@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ms">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iMersWallet - Pembantu Kewangan Peribadi & Perniagaan</title>
+    <title>iMersWallet - Asisten Keuangan Pribadi & Bisnis</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -36,7 +36,7 @@
         }
         .animate-fade { animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         
-        /* Animasi goncangan untuk PIN salah */
+        /* Animasi getar untuk input PIN salah */
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-10px); }
@@ -47,19 +47,24 @@
 </head>
 <body class="pb-24 lg:pb-0 min-h-screen flex flex-col lg:flex-row font-sans">
 
-    <!-- SKRIN KUNCI PIN 6-DIGIT (Gaya Aplikasi Perbankan HP) -->
-    <div id="pin-lockscreen" class="fixed inset-0 bg-slate-900/95 z-[150] flex flex-col items-center justify-center p-6 backdrop-blur-md">
-        <div class="w-full max-w-sm flex flex-col items-center space-y-8 animate-fade" id="pin-container-box">
+    <!-- SCREEN LOCK PIN 6-DIGIT (Style Aplikasi HP Fintech Asli) -->
+    <div id="pin-lockscreen" onclick="focusPinInput()" class="fixed inset-0 bg-slate-900/95 z-[150] flex flex-col items-center justify-center p-6 backdrop-blur-md">
+        <div class="w-full max-w-sm flex flex-col items-center space-y-8 animate-fade" id="pin-container-box" onclick="event.stopPropagation()">
+            
+            <!-- Input Rahasia Asli (Untuk memicu keyboard bawaan HP/Laptop secara otomatis) -->
+            <input type="password" id="real-pin-input" class="absolute -top-40 opacity-0 w-1 h-1 pointer-events-none" maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="off" oninput="handlePinInput(this.value)">
+
             <div class="text-center space-y-2">
-                <div class="w-16 h-16 bg-dana rounded-3xl flex items-center justify-center text-white mx-auto shadow-lg shadow-blue-500/30">
-                    <i data-lucide="shield-check" class="w-8 h-8"></i>
+                <!-- LOGO DINAMIS PADA LOCKSCREEN -->
+                <div id="lockscreen-logo-container" class="cursor-pointer flex justify-center w-full" onclick="focusPinInput()">
+                    <!-- Diisi otomatis oleh renderLogo() -->
                 </div>
-                <h2 class="text-xl font-extrabold text-white tracking-tight mt-4">Sistem Keselamatan iMersWallet</h2>
-                <p class="text-xs text-slate-400 font-semibold">Sila masukkan PIN 6-digit anda untuk mengakses papan pemuka.</p>
+                <h2 class="text-xl font-extrabold text-white tracking-tight mt-4">Sistem Keamanan iMersWallet</h2>
+                <p class="text-xs text-slate-400 font-semibold">Silakan ketik PIN 6-digit Anda via keyboard HP atau tombol di bawah.</p>
             </div>
 
-            <!-- Penunjuk Dot PIN -->
-            <div class="flex gap-4 justify-center py-4" id="pin-dots">
+            <!-- Titik Detektor PIN -->
+            <div class="flex gap-4 justify-center py-4 cursor-pointer" id="pin-dots" onclick="focusPinInput()">
                 <div class="w-4 h-4 rounded-full border-2 border-slate-600 transition-all duration-150"></div>
                 <div class="w-4 h-4 rounded-full border-2 border-slate-600 transition-all duration-150"></div>
                 <div class="w-4 h-4 rounded-full border-2 border-slate-600 transition-all duration-150"></div>
@@ -68,39 +73,40 @@
                 <div class="w-4 h-4 rounded-full border-2 border-slate-600 transition-all duration-150"></div>
             </div>
 
-            <!-- Papan Kekunci Numerik -->
+            <!-- Tombol Keypad Numerik Statis -->
             <div class="grid grid-cols-3 gap-6 w-full max-w-[280px]">
-                ${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => `
-                    <button onclick="pressPinNumber(${num})" class="w-16 h-16 rounded-full bg-slate-800 text-white font-black text-xl flex items-center justify-center hover:bg-slate-700 active:scale-95 transition-all outline-none">
-                        ${num}
-                    </button>
-                `).join('')}
-                <button onclick="clearPin()" class="w-16 h-16 rounded-full text-slate-400 font-bold text-xs flex items-center justify-center hover:bg-slate-800/50 active:scale-95 transition-all outline-none">
-                    Padam
-                </button>
-                <button onclick="pressPinNumber(0)" class="w-16 h-16 rounded-full bg-slate-800 text-white font-black text-xl flex items-center justify-center hover:bg-slate-700 active:scale-95 transition-all outline-none">
-                    0
-                </button>
+                <button onclick="pressPinNumber(1)" class="w-16 h-16 rounded-full bg-slate-800 text-white font-black text-xl flex items-center justify-center hover:bg-slate-700 active:scale-95 transition-all outline-none">1</button>
+                <button onclick="pressPinNumber(2)" class="w-16 h-16 rounded-full bg-slate-800 text-white font-black text-xl flex items-center justify-center hover:bg-slate-700 active:scale-95 transition-all outline-none">2</button>
+                <button onclick="pressPinNumber(3)" class="w-16 h-16 rounded-full bg-slate-800 text-white font-black text-xl flex items-center justify-center hover:bg-slate-700 active:scale-95 transition-all outline-none">3</button>
+                <button onclick="pressPinNumber(4)" class="w-16 h-16 rounded-full bg-slate-800 text-white font-black text-xl flex items-center justify-center hover:bg-slate-700 active:scale-95 transition-all outline-none">4</button>
+                <button onclick="pressPinNumber(5)" class="w-16 h-16 rounded-full bg-slate-800 text-white font-black text-xl flex items-center justify-center hover:bg-slate-700 active:scale-95 transition-all outline-none">5</button>
+                <button onclick="pressPinNumber(6)" class="w-16 h-16 rounded-full bg-slate-800 text-white font-black text-xl flex items-center justify-center hover:bg-slate-700 active:scale-95 transition-all outline-none">6</button>
+                <button onclick="pressPinNumber(7)" class="w-16 h-16 rounded-full bg-slate-800 text-white font-black text-xl flex items-center justify-center hover:bg-slate-700 active:scale-95 transition-all outline-none">7</button>
+                <button onclick="pressPinNumber(8)" class="w-16 h-16 rounded-full bg-slate-800 text-white font-black text-xl flex items-center justify-center hover:bg-slate-700 active:scale-95 transition-all outline-none">8</button>
+                <button onclick="pressPinNumber(9)" class="w-16 h-16 rounded-full bg-slate-800 text-white font-black text-xl flex items-center justify-center hover:bg-slate-700 active:scale-95 transition-all outline-none">9</button>
+                
+                <button onclick="clearPin()" class="w-16 h-16 rounded-full text-slate-400 font-bold text-xs flex items-center justify-center hover:bg-slate-800/50 active:scale-95 transition-all outline-none font-sans">Hapus</button>
+                <button onclick="pressPinNumber(0)" class="w-16 h-16 rounded-full bg-slate-800 text-white font-black text-xl flex items-center justify-center hover:bg-slate-700 active:scale-95 transition-all outline-none">0</button>
                 <button onclick="backspacePin()" class="w-16 h-16 rounded-full text-rose-500 font-bold flex items-center justify-center hover:bg-rose-500/10 active:scale-95 transition-all outline-none">
-                    <i data-lucide="delete" class="w-6 h-6"></i>
+                    <i data-lucide="delete" class="w-6 h-6 mx-auto"></i>
                 </button>
             </div>
 
-            <!-- Butang Bantuan PIN Lupa / Senggaraan -->
-            <div class="text-center space-y-3 pt-2">
+            <!-- Opsi Bantuan Jika Lupa PIN (PIN Default Dihapus dari UI) -->
+            <div class="text-center pt-2">
                 <button onclick="requestForgotPin()" class="text-xs text-dana hover:text-blue-300 font-bold tracking-wide transition-colors flex items-center gap-1.5 mx-auto">
-                    <i data-lucide="key-round" class="w-3.5 h-3.5"></i> Lupa PIN? Hantar Ke WA & Mel
+                    <i data-lucide="key-round" class="w-3.5 h-3.5"></i> Lupa PIN? Kirim via WA & Email
                 </button>
-                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">PIN Laluan: 123456</p>
             </div>
         </div>
     </div>
 
-    <!-- Bar Sisi Desktop (Tampil pada Skrin Besar) -->
+    <!-- Sidebar Desktop (Tampil di Desktop/Tablet) -->
     <aside class="hidden lg:flex flex-col w-72 bg-white border-r border-slate-100 p-6 space-y-8 min-h-screen shrink-0">
+        <!-- HEADER LOGO DINAMIS SIDEBAR -->
         <div class="flex items-center gap-3 px-2">
-            <div class="w-10 h-10 bg-dana rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
-                <i data-lucide="wallet" class="w-5 h-5"></i>
+            <div id="sidebar-logo-container" class="flex justify-center shrink-0">
+                <!-- Diisi otomatis oleh renderLogo() -->
             </div>
             <span class="text-xl font-extrabold tracking-tight text-slate-900">iMers<span class="text-dana">Wallet</span></span>
         </div>
@@ -108,39 +114,39 @@
         <nav class="flex-1 space-y-1">
             <button onclick="router('home')" id="side-home" class="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl font-bold text-sm text-dana bg-blue-50/50 transition-all">
                 <i data-lucide="layout-grid" class="w-5 h-5"></i>
-                <span>Papan Pemuka</span>
+                <span>Dashboard Utama</span>
             </button>
             <button onclick="router('history')" id="side-history" class="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl font-bold text-sm text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all">
                 <i data-lucide="history" class="w-5 h-5"></i>
-                <span>Sejarah Transaksi</span>
+                <span>Riwayat Transaksi</span>
             </button>
             <button onclick="router('analytics')" id="side-analytics" class="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl font-bold text-sm text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all">
                 <i data-lucide="pie-chart" class="w-5 h-5"></i>
-                <span>Analisis Perbelanjaan</span>
+                <span>Analisis Pengeluaran</span>
             </button>
             <button onclick="router('profile')" id="side-profile" class="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl font-bold text-sm text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all">
                 <i data-lucide="user" class="w-5 h-5"></i>
-                <span>Bot WA & Tetapan</span>
+                <span>Bot WA & Pengaturan</span>
             </button>
         </nav>
 
-        <!-- Kotak Info WhatsApp -->
+        <!-- Box WhatsApp Rekod Pantas -->
         <div class="bg-blue-50/70 rounded-3xl p-5 space-y-3">
             <div class="flex items-center gap-2 text-dana">
                 <i data-lucide="sparkles" class="w-5 h-5 animate-pulse"></i>
-                <span class="text-xs font-bold uppercase tracking-wider">Rekod Pantas</span>
+                <span class="text-xs font-bold uppercase tracking-wider">Catat Cepat</span>
             </div>
-            <p class="text-xs text-slate-500 font-medium leading-relaxed font-semibold">Hantar mesej WA untuk merekod perbelanjaan peribadi atau perniagaan anda secara automatik.</p>
+            <p class="text-xs text-slate-500 font-medium leading-relaxed font-semibold">Kirim chat WA ke bot asisten untuk mencatatkan pemasukan/pengeluaran secara instan.</p>
             <a id="desktop-wa-btn" href="#" target="_blank" class="w-full py-2.5 bg-dana hover:bg-dana-dark text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-md shadow-blue-100">
-                <i data-lucide="message-square" class="w-4 h-4"></i> Mula Chat Bot WA
+                <i data-lucide="message-square" class="w-4 h-4"></i> Chat Asisten WA
             </a>
         </div>
     </aside>
 
-    <!-- Kawasan Kandungan Utama -->
+    <!-- Area Konten Utama -->
     <main class="flex-1 min-w-0">
         <div id="app" class="w-full">
-            <!-- Skrin Pemuat Global -->
+            <!-- Loader Screen -->
             <div id="global-loader" class="fixed inset-0 bg-white z-[100] flex items-center justify-center">
                 <div class="flex flex-col items-center gap-4">
                     <div class="w-12 h-12 border-4 border-blue-100 border-t-dana rounded-full animate-spin"></div>
@@ -150,7 +156,7 @@
         </div>
     </main>
 
-    <!-- Bar Navigasi Bawah Mudah Alih (Tampil pada Telefon Pintar) -->
+    <!-- Bottom Navigation Bar Mobile (Tampil di HP) -->
     <nav id="navbar" class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 flex justify-around items-center py-4 z-50 lg:hidden bottom-nav rounded-t-[32px]">
         <button onclick="router('home')" id="nav-home" class="flex flex-col items-center gap-1 text-dana transition-all">
             <i data-lucide="layout-grid" class="w-6 h-6"></i>
@@ -158,7 +164,7 @@
         </button>
         <button onclick="router('history')" id="nav-history" class="flex flex-col items-center gap-1 text-gray-400">
             <i data-lucide="history" class="w-6 h-6"></i>
-            <span class="text-[9px] font-bold">Sejarah</span>
+            <span class="text-[9px] font-bold">Riwayat</span>
         </button>
         <div class="relative -top-8">
             <button onclick="openModal('addTransaction')" class="w-14 h-14 bg-dana hover:bg-dana-dark text-white rounded-full shadow-lg shadow-blue-200 border-4 border-white flex items-center justify-center hover:scale-105 transition-all">
@@ -183,7 +189,7 @@
         <p id="toast-message" class="text-sm font-semibold"></p>
     </div>
 
-    <!-- Bekas Pangkalan Modal -->
+    <!-- Modal Base Container -->
     <div id="modal-overlay" class="fixed inset-0 bg-slate-900/40 z-[110] hidden backdrop-blur-xs items-center justify-center p-4">
         <div id="modal-box" class="bg-white w-full max-w-md rounded-[32px] p-6 shadow-2xl transition-all duration-300 scale-95 opacity-0">
             <!-- Kandungan Dinamik Modal -->
@@ -191,7 +197,7 @@
     </div>
 
     <script>
-        // --- DATA DUMMY TEMPATAN SEBAGAI FALLBACK JIKA RANGKAIAN TERGANGGU ---
+        // --- DATA DUMMY TEMPATAN SEBAGAI FALLBACK ---
         const DUMMY_DATA = {
             stats: { 
                 balance: 5440000, 
@@ -216,6 +222,7 @@
                 FONNTE_TOKEN: "",
                 BOT_NUMBER: "628123456789",
                 USER_EMAIL: "owner@example.com",
+                APP_LOGO: "", // Default kosong (akan fallback ke ikon Lucide Wallet)
                 TEMPLATE_SUCCESS: "✅ *Pencatatan Berhasil!*\n\n📂 *KANTONG: {wallet}*\n💰 *TIPE: {type}*\n📝 Kategori: {category}\n💬 Catatan: {note}\n💸 Nominal: *Rp{amount}*",
                 TEMPLATE_OVER_BUDGET: "⚠️ *WARNING BUDGET JEBOL!* ⚠️\n\nPengeluaran Anda pada kategori *{category}* telah melebihi batas anggaran bulanan!\n\n💸 Terpakai: *Rp{spent}*\n📊 Batas Anggaran: *Rp{limit}*",
                 TEMPLATE_WARN_BUDGET: "⚠️ *PERINGATAN HEMAT!* ⚠️\n\nPengeluaran kategori *{category}* sudah mencapai *{ratio}%* dari batas anggaran bulanan Anda.",
@@ -229,7 +236,6 @@
             BOT_NUMBER: "628123456789"
         };
 
-        // Peta Ikon Kategori untuk Antarmuka Premium
         const CATEGORY_ICONS = {
             'Gaji': { icon: 'briefcase', bg: 'bg-green-100', text: 'text-green-600' },
             'Freelance': { icon: 'award', bg: 'bg-emerald-100', text: 'text-emerald-600' },
@@ -244,23 +250,69 @@
 
         let state = {
             view: 'home',
-            data: JSON.parse(JSON.stringify(DUMMY_DATA)), // Nilai awal menggunakan data tempatan agar tidak kosong
+            data: JSON.parse(JSON.stringify(DUMMY_DATA)),
             isUsingDemo: true,
-            subTab: 'daily', // Pilihan tab: daily, calendar, yearly, budget
+            subTab: 'daily',
             isLoading: false,
-            enteredPin: "" // Menyimpan PIN keselamatan yang dimasukkan oleh pengguna
+            enteredPin: ""
         };
 
         const formatIDR = (val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val);
 
-        // --- PENGURUSAN SISTEM PIN KESELAMATAN ---
-        function pressPinNumber(num) {
-            if (state.enteredPin.length < 6) {
-                state.enteredPin += num;
-                updatePinIndicators();
+        // --- RENDER LOGO DINAMIS (Kustom Gambar / Ikon Fallback) ---
+        function renderLogo(sizeClass = "w-10 h-10", iconSize = "w-5 h-5") {
+            const logoUrl = state.data.settings.APP_LOGO || "";
+            if (logoUrl && logoUrl.trim() !== "" && logoUrl.startsWith("http")) {
+                return `
+                    <div class="relative ${sizeClass} mx-auto">
+                        <img src="${logoUrl}" class="w-full h-full rounded-2xl object-cover shadow-md" alt="Logo" onerror="handleLogoError(this, '${sizeClass}', '${iconSize}')">
+                    </div>
+                `;
             }
+            return `<div class="${sizeClass} mx-auto bg-dana rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-200"><i data-lucide="wallet" class="${iconSize}"></i></div>`;
+        }
+
+        function handleLogoError(imgElement, sizeClass, iconSize) {
+            const container = imgElement.parentElement;
+            if (container) {
+                container.innerHTML = `<div class="${sizeClass} mx-auto bg-dana rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-200"><i data-lucide="wallet" class="${iconSize}"></i></div>`;
+                lucide.createIcons();
+            }
+        }
+
+        function updateLogosInUI() {
+            const sidebarContainer = document.getElementById('sidebar-logo-container');
+            if (sidebarContainer) sidebarContainer.innerHTML = renderLogo("w-10 h-10", "w-5 h-5");
+            
+            const lockscreenContainer = document.getElementById('lockscreen-logo-container');
+            if (lockscreenContainer) lockscreenContainer.innerHTML = renderLogo("w-16 h-16", "w-8 h-8");
+            
+            lucide.createIcons();
+        }
+
+        // --- PENGURUSAN SISTEM PIN KESELAMATAN ---
+        function focusPinInput() {
+            const input = document.getElementById('real-pin-input');
+            if (input) {
+                input.focus();
+            }
+        }
+
+        function handlePinInput(val) {
+            val = val.replace(/[^0-9]/g, '');
+            state.enteredPin = val;
+            updatePinIndicators();
+            
             if (state.enteredPin.length === 6) {
                 verifyPin();
+            }
+        }
+
+        function pressPinNumber(num) {
+            const input = document.getElementById('real-pin-input');
+            if (input && input.value.length < 6) {
+                input.value += num;
+                handlePinInput(input.value);
             }
         }
 
@@ -275,37 +327,38 @@
             });
         }
 
-        // --- FUNGSI LUPA PIN (TERHANTAR KE WA & EMAIL) ---
         async function requestForgotPin() {
-            showToast("Menghantar PIN keselamatan ke WhatsApp & E-mel...", "success");
+            showToast("Mengirimkan PIN keselamatan...", "success");
             try {
-                // Di sini kita menghantar permintaan ke Google Apps Script action: forgotPin
-                const response = await fetchWithTimeout(`${CONFIG.API_URL}?action=triggerWeeklyReport`, { timeout: 5000 });
+                const response = await fetchWithTimeout(`${CONFIG.API_URL}?action=forgotPin`, { timeout: 5000 });
                 const result = await response.json();
                 if (result && result.status === 'success') {
-                    showToast("PIN berjaya dihantar ke WA & Mel!", "success");
+                    showToast("PIN berhasil dikirim ke WA & Email!", "success");
                 } else {
                     throw new Error("Gagal");
                 }
             } catch (err) {
-                // Sekiranya CORS terblokir dalam persekitaran Sandbox
-                showToast("PIN keselamatan dihantar ke WhatsApp pemilik (123456)!", "success");
+                showToast("PIN keselamatan terkirim ke WhatsApp pemilik (123456)!", "success");
             }
         }
 
         function clearPin() {
+            const input = document.getElementById('real-pin-input');
+            if (input) {
+                input.value = "";
+            }
             state.enteredPin = "";
             updatePinIndicators();
         }
 
         function backspacePin() {
-            if (state.enteredPin.length > 0) {
-                state.enteredPin = state.enteredPin.slice(0, -1);
-                updatePinIndicators();
+            const input = document.getElementById('real-pin-input');
+            if (input && input.value.length > 0) {
+                input.value = input.value.slice(0, -1);
+                handlePinInput(input.value);
             }
         }
 
-        // Pengesahan PIN keselamatan ke pangkalan data
         async function verifyPin() {
             try {
                 const response = await fetch(`${CONFIG.API_URL}?action=verifyPin&pin=${state.enteredPin}`);
@@ -314,17 +367,16 @@
                 if (result && result.status === 'success') {
                     document.getElementById('pin-lockscreen').classList.add('hidden');
                     sessionStorage.setItem('authenticated_pin', 'true');
-                    showToast("Sesi Keselamatan Disahkan!", "success");
+                    showToast("Sesi Keamanan Terverifikasi!", "success");
                     fetchDashboardData();
                 } else {
                     triggerPinShake();
                 }
             } catch (err) {
-                // Fallback untuk kegunaan tempatan sekiranya tiada sambungan internet
                 if (state.enteredPin === "123456") {
                     document.getElementById('pin-lockscreen').classList.add('hidden');
                     sessionStorage.setItem('authenticated_pin', 'true');
-                    showToast("Sesi Demo Tempatan Dibuka!", "success");
+                    showToast("Sesi Demo Terbuka!", "success");
                     fetchDashboardData();
                 } else {
                     triggerPinShake();
@@ -335,10 +387,11 @@
         function triggerPinShake() {
             const box = document.getElementById('pin-container-box');
             box.classList.add('animate-shake');
-            showToast("PIN yang anda masukkan tidak betul!", "warn");
+            showToast("PIN yang Anda masukkan salah!", "warn");
             setTimeout(() => {
                 box.classList.remove('animate-shake');
                 clearPin();
+                focusPinInput();
             }, 500);
         }
 
@@ -372,18 +425,19 @@
                     state.data = result;
                     state.isUsingDemo = false;
                     CONFIG.BOT_NUMBER = result.settings.BOT_NUMBER || CONFIG.BOT_NUMBER;
-                    showToast("Pangkalan Data Berjaya Disinkronkan!", "success");
+                    showToast("Sinkronisasi Cloud Berhasil!", "success");
                 } else {
                     throw new Error("Format respons tidak sepadan.");
                 }
             } catch (error) {
                 console.warn("Rangkaian luar talian. Menggunakan pangkalan data tempatan.");
                 state.isUsingDemo = true;
-                showToast("Menggunakan Pangkalan Data Demo (Luar Talian)", "warn");
+                showToast("Menggunakan Database Offline (Simulasi)", "warn");
             } finally {
                 state.isLoading = false;
                 document.getElementById('global-loader')?.classList.add('hidden');
                 render();
+                updateLogosInUI();
             }
         }
 
@@ -413,13 +467,12 @@
         const DashboardView = () => {
             const stats = state.data.stats;
             
-            // Pengiraan baki dompet dinamik untuk kegunaan peribadi & perniagaan
             const walletPeribadi = state.data.transactions
                 .filter(t => t.wallet === 'Pribadi' || t.wallet === 'Peribadi')
                 .reduce((acc, t) => t.type === 'income' ? acc + t.amount : acc - t.amount, 0);
 
             const walletPerniagaan = state.data.transactions
-                .filter(t => t.wallet === 'Bisnis' || t.wallet === 'Perniagaan')
+                .filter(t => t.wallet === 'Bisnis' || t.wallet === 'Perniagaan' || t.wallet === 'Bisnis')
                 .reduce((acc, t) => t.type === 'income' ? acc + t.amount : acc - t.amount, 0);
 
             const walletSimpanan = state.data.transactions
@@ -433,7 +486,7 @@
                             <i data-lucide="info" class="w-5 h-5"></i>
                         </div>
                         <div>
-                            <h4 class="font-bold text-sm">Mod Demo Aktif (Luar Talian)</h4>
+                            <h4 class="font-bold text-sm">Mode Demo Aktif (Offline)</h4>
                             <p class="text-xs text-amber-700/90 font-semibold">Tautan API Sheets belum merespon atau CORS diblokir. Menggunakan data spreadsheet lokal bawaan.</p>
                         </div>
                     </div>
@@ -479,7 +532,7 @@
                         <div class="relative z-10 space-y-8">
                             <div class="flex justify-between items-start">
                                 <div>
-                                    <p class="text-blue-100 font-semibold opacity-80">Jumlah Baki Aktif</p>
+                                    <p class="text-blue-100 font-semibold opacity-80">Jumlah Baki Sisa</p>
                                     <h1 class="text-4xl lg:text-5xl font-extrabold mt-1 tracking-tight">${formatIDR(stats.balance)}</h1>
                                 </div>
                                 <span class="px-4 py-1.5 bg-white/20 rounded-full text-xs font-bold backdrop-blur-md flex items-center gap-1">
@@ -506,38 +559,35 @@
                     <div class="space-y-3">
                         <h3 class="text-sm font-extrabold text-slate-400 uppercase tracking-wider">Kantong Alokasi Keuangan</h3>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <!-- Kantong Peribadi -->
                             <div class="bg-white p-6 rounded-[28px] border border-slate-100 card-shadow flex items-center justify-between group hover:border-blue-200 transition-all">
                                 <div class="flex items-center gap-4">
                                     <div class="w-12 h-12 bg-blue-50 text-dana rounded-2xl flex items-center justify-center shrink-0">
                                         <i data-lucide="user" class="w-6 h-6"></i>
                                     </div>
                                     <div>
-                                        <p class="text-xs font-bold text-slate-400 uppercase">Kantong Peribadi</p>
+                                        <p class="text-xs font-bold text-slate-400 uppercase">Kantong Pribadi</p>
                                         <h4 class="text-lg font-extrabold text-slate-900 mt-1">${formatIDR(walletPeribadi)}</h4>
                                     </div>
                                 </div>
                             </div>
-                            <!-- Kas Perniagaan -->
                             <div class="bg-white p-6 rounded-[28px] border border-slate-100 card-shadow flex items-center justify-between group hover:border-emerald-200 transition-all">
                                 <div class="flex items-center gap-4">
                                     <div class="w-12 h-12 bg-emerald-50 text-emerald-500 rounded-2xl flex items-center justify-center shrink-0">
                                         <i data-lucide="briefcase" class="w-6 h-6"></i>
                                     </div>
                                     <div>
-                                        <p class="text-xs font-bold text-slate-400 uppercase">Kas Perniagaan / Usaha</p>
+                                        <p class="text-xs font-bold text-slate-400 uppercase">Kas Bisnis / Usaha</p>
                                         <h4 class="text-lg font-extrabold text-slate-900 mt-1">${formatIDR(walletPerniagaan)}</h4>
                                     </div>
                                 </div>
                             </div>
-                            <!-- Kantong Simpanan -->
                             <div class="bg-white p-6 rounded-[28px] border border-slate-100 card-shadow flex items-center justify-between group hover:border-purple-200 transition-all">
                                 <div class="flex items-center gap-4">
                                     <div class="w-12 h-12 bg-purple-50 text-purple-500 rounded-2xl flex items-center justify-center shrink-0">
                                         <i data-lucide="piggy-bank" class="w-6 h-6"></i>
                                     </div>
                                     <div>
-                                        <p class="text-xs font-bold text-slate-400 uppercase">Kantong Simpanan</p>
+                                        <p class="text-xs font-bold text-slate-400 uppercase">Kantong Tabungan</p>
                                         <h4 class="text-lg font-extrabold text-slate-900 mt-1">${formatIDR(walletSimpanan)}</h4>
                                     </div>
                                 </div>
@@ -558,14 +608,13 @@
                             <!-- TAB: DAILY (Mutasi Harian Terperinci) -->
                             <div id="view-tab-daily" class="${state.subTab === 'daily' ? '' : 'hidden'} space-y-5 animate-fade">
                                 <div class="flex justify-between items-center mb-4">
-                                    <h3 class="font-bold text-slate-900">Arus Wang Harian</h3>
-                                    <span class="text-xs text-slate-400 font-semibold">${state.data.transactions.length} Rekod Transaksi</span>
+                                    <h3 class="font-bold text-slate-900">Arus Kas Harian</h3>
+                                    <span class="text-xs text-slate-400 font-semibold">${state.data.transactions.length} Rekor Transaksi</span>
                                 </div>
                                 <div class="space-y-4">
                                     ${state.data.transactions.length > 0 ? state.data.transactions.slice(-6).reverse().map(t => {
                                         const meta = CATEGORY_ICONS[t.category] || CATEGORY_ICONS['Lainnya'];
-                                        // Terjemahkan nama wallet untuk UI display Melayu
-                                        let displayWallet = t.wallet === 'Pribadi' ? 'Peribadi' : (t.wallet === 'Bisnis' ? 'Perniagaan' : (t.wallet === 'Tabungan' ? 'Simpanan' : t.wallet));
+                                        let displayWallet = t.wallet === 'Pribadi' ? 'Pribadi' : (t.wallet === 'Bisnis' ? 'Bisnis' : (t.wallet === 'Tabungan' ? 'Tabungan' : t.wallet));
                                         return `
                                             <div class="flex items-center justify-between p-3 rounded-2xl hover:bg-slate-50 transition-all cursor-pointer group animate-fade">
                                                 <div class="flex items-center gap-4">
@@ -575,7 +624,7 @@
                                                     <div>
                                                         <p class="font-bold text-slate-850 text-sm">${t.category}</p>
                                                         <div class="flex items-center gap-2 mt-0.5">
-                                                            <span class="px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded text-[9px] font-extrabold uppercase">${displayWallet || 'Peribadi'}</span>
+                                                            <span class="px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded text-[9px] font-extrabold uppercase">${displayWallet || 'Pribadi'}</span>
                                                             <span class="text-[11px] text-slate-400 font-semibold">${t.note}</span>
                                                         </div>
                                                     </div>
@@ -596,7 +645,7 @@
                             <div id="view-tab-calendar" class="${state.subTab === 'calendar' ? '' : 'hidden'} space-y-4 animate-fade">
                                 <h3 class="font-bold text-slate-900">Sebaran Hari Transaksi</h3>
                                 <div class="grid grid-cols-7 gap-2 text-center text-xs font-bold pt-4 text-slate-400">
-                                    <div>A</div><div>I</div><div>S</div><div>R</div><div>K</div><div>J</div><div>S</div>
+                                    <div>S</div><div>S</div><div>R</div><div>K</div><div>J</div><div>S</div><div>M</div>
                                 </div>
                                 <div class="grid grid-cols-7 gap-2 text-center pt-2">
                                     ${Array.from({length: 31}, (_, i) => {
@@ -613,7 +662,7 @@
 
                             <!-- TAB: YEARLY -->
                             <div id="view-tab-yearly" class="${state.subTab === 'yearly' ? '' : 'hidden'} space-y-4 animate-fade">
-                                <h3 class="font-bold text-slate-900">Performa Kewangan Tahunan</h3>
+                                <h3 class="font-bold text-slate-900">Performa Keuangan Tahunan</h3>
                                 <div id="chart-yearly" class="min-h-[250px]"></div>
                             </div>
 
@@ -689,16 +738,16 @@
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr class="bg-slate-50 text-slate-400 text-[10px] font-bold uppercase tracking-wider border-b border-slate-100">
-                                    <th class="p-6">Tarikh</th>
+                                    <th class="p-6">Tanggal</th>
                                     <th class="p-6">Kategori</th>
                                     <th class="p-6">Catatan</th>
-                                    <th class="p-6 text-right">Amaun</th>
+                                    <th class="p-6 text-right">Jumlah</th>
                                     <th class="p-6 text-center">Dompet</th>
                                 </tr>
                             </thead>
                             <tbody id="history-table-body" class="divide-y divide-slate-50 text-sm">
                                 ${state.data.transactions.map(t => {
-                                    let displayWallet = t.wallet === 'Pribadi' ? 'Peribadi' : (t.wallet === 'Bisnis' ? 'Perniagaan' : (t.wallet === 'Tabungan' ? 'Simpanan' : t.wallet));
+                                    let displayWallet = t.wallet === 'Pribadi' ? 'Pribadi' : (t.wallet === 'Bisnis' ? 'Bisnis' : (t.wallet === 'Tabungan' ? 'Tabungan' : t.wallet));
                                     return `
                                         <tr class="hover:bg-slate-50/50 transition-colors animate-fade" data-type="${t.type}" data-note="${t.note.toLowerCase()}">
                                             <td class="p-6 font-medium text-slate-500">${t.date}</td>
@@ -709,7 +758,7 @@
                                             </td>
                                             <td class="p-6 text-center">
                                                 <span class="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-lg text-[10px] font-bold uppercase">
-                                                    ${displayWallet || 'Peribadi'}
+                                                    ${displayWallet || 'Pribadi'}
                                                 </span>
                                             </td>
                                         </tr>
@@ -740,7 +789,7 @@
                         <div class="space-y-4">
                             <div class="flex items-center gap-2 text-dana">
                                 <i data-lucide="sparkles" class="w-5 h-5"></i>
-                                <h3 class="text-lg font-extrabold">iMers AI Insights</h3>
+                                <h3 class="text-lg font-extrabold">iMers Wallet AI Insights</h3>
                             </div>
                             <p class="text-xs text-slate-500 leading-relaxed font-semibold">Berdasarkan data aliran tunai semasa:</p>
                             <div class="p-4 bg-blue-50/50 rounded-2xl border border-blue-100 text-xs leading-relaxed">
@@ -778,6 +827,11 @@
                             <div>
                                 <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">Nomor Bot WA (Contoh: 628123xxx)</label>
                                 <input type="text" id="cfg-bot-number" value="${state.data.settings.BOT_NUMBER || ''}" placeholder="62812345678" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs outline-none focus:border-dana font-mono">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">URL Logo Kustom Gambar (PNG/JPG)</label>
+                                <input type="text" id="cfg-app-logo" value="${state.data.settings.APP_LOGO || ''}" placeholder="https://domain.com/logo.png" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs outline-none focus:border-dana font-mono">
+                                <p class="text-[9px] text-slate-400 mt-1 font-semibold">Tautkan URL gambar logo kustom kamu sendiri di sini untuk mengganti logo default.</p>
                             </div>
                             <div>
                                 <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">PIN Kemasukan Baru (6 Digit)</label>
@@ -881,6 +935,7 @@
             const apiVal = document.getElementById('cfg-api-url').value.trim();
             const tokenVal = document.getElementById('cfg-fonnte-token').value.trim();
             const botVal = document.getElementById('cfg-bot-number').value.trim();
+            const logoVal = document.getElementById('cfg-app-logo').value.trim();
             const emailVal = document.getElementById('cfg-user-email').value.trim();
             const pinVal = document.getElementById('cfg-user-pin').value.trim();
 
@@ -895,6 +950,7 @@
                 action: 'saveSettings',
                 fonnte_token: tokenVal,
                 bot_number: botVal,
+                app_logo: logoVal,
                 user_email: emailVal,
                 user_pin: pinVal,
                 template_success: tmplSuccess,
@@ -913,6 +969,9 @@
                     fetchDashboardData();
                 }
             } catch (err) {
+                // Terapkan kustomisasi lokal jika gagal menyimpan secara online
+                state.data.settings.APP_LOGO = logoVal;
+                updateLogosInUI();
                 showToast("Simpan gagal (Sandbox Offline Mode)", "warn");
             }
         }
@@ -950,6 +1009,9 @@
             state.view = view;
             updateNavHighlights(view);
             render();
+            
+            // Re-render logo setelah berpindah view pengaturan
+            updateLogosInUI();
         }
 
         function updateNavHighlights(view) {
@@ -1207,7 +1269,9 @@
                 fetchDashboardData();
             } else {
                 document.getElementById('global-loader').classList.add('hidden');
-                lucide.createIcons();
+                updateLogosInUI();
+                // Fokus pada input secara automatik
+                setTimeout(focusPinInput, 500);
             }
         };
     </script>
