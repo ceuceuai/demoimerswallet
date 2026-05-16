@@ -251,6 +251,28 @@
             BOT_NUMBER: "628123456789"
         };
 
+        // --- SISTEM NOTIFIKASI TOAST (Didefinisikan Di Awal Untuk Mencegah ReferenceError) ---
+        function showToast(message, type = "success") {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            const toastIconBox = document.getElementById('toast-icon-box');
+            
+            toastMsg.innerText = message;
+            if (type === "success") {
+                toastIconBox.className = "w-5 h-5 bg-green-500 rounded-full flex items-center justify-center shrink-0 animate-pulse";
+                toastIconBox.innerHTML = `<i data-lucide="check" class="w-3 h-3 text-white"></i>`;
+            } else {
+                toastIconBox.className = "w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center shrink-0";
+                toastIconBox.innerHTML = `<i data-lucide="alert-circle" class="w-3 h-3 text-white"></i>`;
+            }
+            
+            lucide.createIcons();
+            toast.classList.remove('translate-y-[-100px]', 'opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('translate-y-[-100px]', 'opacity-0', 'pointer-events-none');
+            }, 3000);
+        }
+
         let state = {
             view: 'home',
             data: JSON.parse(JSON.stringify(DUMMY_DATA)),
