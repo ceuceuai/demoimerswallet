@@ -4,10 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>iMersWallet - Asisten Keuangan Pribadi & Bisnis</title>
+    <!-- Tailwind CSS untuk Desain Responsif & Modern -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- ApexCharts untuk Visualisasi Data Finansial -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <!-- Lucide Icons untuk Ikon Premium Modern -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Font Plus Jakarta Sans Premium dari Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <style>
         :root { 
             --dana-blue: #108EE9; 
@@ -24,19 +29,23 @@
         .bg-dana { background-color: var(--dana-blue); }
         .bg-dana-dark { background-color: var(--dana-dark); }
         .text-dana { color: var(--dana-blue); }
+        
+        /* Bayangan Kartu Premium ala Fintech */
         .card-shadow { 
             box-shadow: 0 20px 35px -5px rgba(16, 142, 233, 0.05), 0 10px 15px -5px rgba(16, 142, 233, 0.02); 
         }
         .bottom-nav { 
             box-shadow: 0 -5px 30px rgba(16, 142, 233, 0.08); 
         }
+        
+        /* Animasi Transisi Halaman */
         @keyframes fadeIn { 
             from { opacity: 0; transform: translateY(10px); } 
             to { opacity: 1; transform: translateY(0); } 
         }
         .animate-fade { animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         
-        /* Animasi getar jika input PIN salah */
+        /* Animasi Getar untuk PIN Salah */
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-10px); }
@@ -47,7 +56,7 @@
 </head>
 <body class="pb-24 lg:pb-0 min-h-screen flex flex-col lg:flex-row font-sans">
 
-    <!-- SCREEN LOCK PIN 6-DIGIT (Style Aplikasi HP Fintech Asli) -->
+    <!-- SCREEN LOCK PIN 6-DIGIT (Gaya Aplikasi Finansial HP Asli) -->
     <div id="pin-lockscreen" onclick="focusPinInput()" class="fixed inset-0 bg-slate-900/95 z-[150] flex flex-col items-center justify-center p-6 backdrop-blur-md">
         <div class="w-full max-w-sm flex flex-col items-center space-y-8 animate-fade" id="pin-container-box" onclick="event.stopPropagation()">
             
@@ -55,15 +64,15 @@
             <input type="password" id="real-pin-input" class="absolute -top-40 opacity-0 w-1 h-1 pointer-events-none" maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="off" oninput="handlePinInput(this.value)">
 
             <div class="text-center space-y-2">
-                <!-- LOGO DINAMIS PADA LOCKSCREEN -->
+                <!-- LOGO DINAMIS PADA LOCKSCREEN (Presisi Di Tengah) -->
                 <div id="lockscreen-logo-container" class="cursor-pointer flex justify-center w-full" onclick="focusPinInput()">
-                    <!-- Diisi otomatis oleh renderLogo() -->
+                    <!-- Diisi otomatis oleh fungsi renderLogo() -->
                 </div>
                 <h2 class="text-xl font-extrabold text-white tracking-tight mt-4">Sistem Keamanan iMersWallet</h2>
                 <p class="text-xs text-slate-400 font-semibold">Silakan ketik PIN 6-digit Anda via keyboard HP atau tombol di bawah.</p>
             </div>
 
-            <!-- Titik Detektor PIN -->
+            <!-- Titik Penunjuk PIN -->
             <div class="flex gap-4 justify-center py-4 cursor-pointer" id="pin-dots" onclick="focusPinInput()">
                 <div class="w-4 h-4 rounded-full border-2 border-slate-600 transition-all duration-150"></div>
                 <div class="w-4 h-4 rounded-full border-2 border-slate-600 transition-all duration-150"></div>
@@ -73,14 +82,16 @@
                 <div class="w-4 h-4 rounded-full border-2 border-slate-600 transition-all duration-150"></div>
             </div>
 
-            <!-- Tombol Keypad Numerik Statis -->
+            <!-- Tombol Keypad Numerik Statis (Rapi & Sejajar) -->
             <div class="grid grid-cols-3 gap-6 w-full max-w-[280px]">
                 <button onclick="pressPinNumber(1)" class="w-16 h-16 rounded-full bg-slate-800 text-white font-black text-xl flex items-center justify-center hover:bg-slate-700 active:scale-95 transition-all outline-none">1</button>
                 <button onclick="pressPinNumber(2)" class="w-16 h-16 rounded-full bg-slate-800 text-white font-black text-xl flex items-center justify-center hover:bg-slate-700 active:scale-95 transition-all outline-none">2</button>
                 <button onclick="pressPinNumber(3)" class="w-16 h-16 rounded-full bg-slate-800 text-white font-black text-xl flex items-center justify-center hover:bg-slate-700 active:scale-95 transition-all outline-none">3</button>
+                
                 <button onclick="pressPinNumber(4)" class="w-16 h-16 rounded-full bg-slate-800 text-white font-black text-xl flex items-center justify-center hover:bg-slate-700 active:scale-95 transition-all outline-none">4</button>
                 <button onclick="pressPinNumber(5)" class="w-16 h-16 rounded-full bg-slate-800 text-white font-black text-xl flex items-center justify-center hover:bg-slate-700 active:scale-95 transition-all outline-none">5</button>
                 <button onclick="pressPinNumber(6)" class="w-16 h-16 rounded-full bg-slate-800 text-white font-black text-xl flex items-center justify-center hover:bg-slate-700 active:scale-95 transition-all outline-none">6</button>
+                
                 <button onclick="pressPinNumber(7)" class="w-16 h-16 rounded-full bg-slate-800 text-white font-black text-xl flex items-center justify-center hover:bg-slate-700 active:scale-95 transition-all outline-none">7</button>
                 <button onclick="pressPinNumber(8)" class="w-16 h-16 rounded-full bg-slate-800 text-white font-black text-xl flex items-center justify-center hover:bg-slate-700 active:scale-95 transition-all outline-none">8</button>
                 <button onclick="pressPinNumber(9)" class="w-16 h-16 rounded-full bg-slate-800 text-white font-black text-xl flex items-center justify-center hover:bg-slate-700 active:scale-95 transition-all outline-none">9</button>
@@ -101,7 +112,7 @@
         </div>
     </div>
 
-    <!-- Sidebar Desktop (Tampil di Desktop/Tablet) -->
+    <!-- Sidebar Desktop (Hanya muncul di Desktop / Tablet Besar) -->
     <aside class="hidden lg:flex flex-col w-72 bg-white border-r border-slate-100 p-6 space-y-8 min-h-screen shrink-0">
         <!-- HEADER LOGO DINAMIS SIDEBAR -->
         <div class="flex items-center gap-3 px-2">
@@ -111,6 +122,7 @@
             <span class="text-xl font-extrabold tracking-tight text-slate-900">iMers<span class="text-dana">Wallet</span></span>
         </div>
 
+        <!-- Menu Navigasi Utama -->
         <nav class="flex-1 space-y-1">
             <button onclick="router('home')" id="side-home" class="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl font-bold text-sm text-dana bg-blue-50/50 transition-all">
                 <i data-lucide="layout-grid" class="w-5 h-5"></i>
@@ -130,7 +142,7 @@
             </button>
         </nav>
 
-        <!-- Box WhatsApp Rekod Pantas -->
+        <!-- Box WhatsApp Info Pencatatan Cepat -->
         <div class="bg-blue-50/70 rounded-3xl p-5 space-y-3">
             <div class="flex items-center gap-2 text-dana">
                 <i data-lucide="sparkles" class="w-5 h-5 animate-pulse"></i>
@@ -143,10 +155,10 @@
         </div>
     </aside>
 
-    <!-- Area Konten Utama -->
+    <!-- Area Utama Tempat Menampilkan Halaman Dinamis -->
     <main class="flex-1 min-w-0">
         <div id="app" class="w-full">
-            <!-- Loader Screen -->
+            <!-- Skrin Loader Saat Menghubungkan Apps Script -->
             <div id="global-loader" class="fixed inset-0 bg-white z-[100] flex items-center justify-center">
                 <div class="flex flex-col items-center gap-4">
                     <div class="w-12 h-12 border-4 border-blue-100 border-t-dana rounded-full animate-spin"></div>
@@ -156,7 +168,7 @@
         </div>
     </main>
 
-    <!-- Bottom Navigation Bar Mobile (Tampil di HP) -->
+    <!-- Navigasi Bawah Khusus HP (Mobile Bottom Navigation) -->
     <nav id="navbar" class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 flex justify-around items-center py-4 z-50 lg:hidden bottom-nav rounded-t-[32px]">
         <button onclick="router('home')" id="nav-home" class="flex flex-col items-center gap-1 text-dana transition-all">
             <i data-lucide="layout-grid" class="w-6 h-6"></i>
@@ -166,11 +178,14 @@
             <i data-lucide="history" class="w-6 h-6"></i>
             <span class="text-[9px] font-bold">Riwayat</span>
         </button>
+        
+        <!-- FAB Floating Button Tambah Transaksi -->
         <div class="relative -top-8">
             <button onclick="openModal('addTransaction')" class="w-14 h-14 bg-dana hover:bg-dana-dark text-white rounded-full shadow-lg shadow-blue-200 border-4 border-white flex items-center justify-center hover:scale-105 transition-all">
                 <i data-lucide="plus" class="w-7 h-7"></i>
             </button>
         </div>
+        
         <button onclick="router('analytics')" id="nav-analytics" class="flex flex-col items-center gap-1 text-gray-400">
             <i data-lucide="pie-chart" class="w-6 h-6"></i>
             <span class="text-[9px] font-bold">Analisis</span>
@@ -183,7 +198,7 @@
 
     <!-- Notifikasi Toast -->
     <div id="toast" class="fixed top-6 right-6 z-[120] bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 transition-all duration-300 translate-y-[-100px] opacity-0 pointer-events-none">
-        <div class="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center" id="toast-icon-box">
+        <div class="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center animate-pulse" id="toast-icon-box">
             <i data-lucide="check" class="w-3 h-3 text-white"></i>
         </div>
         <p id="toast-message" class="text-sm font-semibold"></p>
@@ -192,12 +207,12 @@
     <!-- Modal Base Container -->
     <div id="modal-overlay" class="fixed inset-0 bg-slate-900/40 z-[110] hidden backdrop-blur-xs items-center justify-center p-4">
         <div id="modal-box" class="bg-white w-full max-w-md rounded-[32px] p-6 shadow-2xl transition-all duration-300 scale-95 opacity-0">
-            <!-- Kandungan Dinamik Modal -->
+            <!-- Isi modal dinonaktifkan / dirender dinamis di sini -->
         </div>
     </div>
 
     <script>
-        // --- DATA DUMMY TEMPATAN SEBAGAI FALLBACK ---
+        // --- DATA DUMMY SEBAGAI CADANGAN JIKA TERJADI OFFLINE ---
         const DUMMY_DATA = {
             stats: { 
                 balance: 5440000, 
@@ -206,11 +221,11 @@
             },
             transactions: [
                 { date: "2026-05-01", type: "income", category: "Gaji", amount: 5000000, note: "Gaji Bulanan", wallet: "Pribadi" },
-                { date: "2026-05-02", type: "expense", category: "Makanan", amount: 85000, note: "Makan dan kopi", wallet: "Pribadi" },
+                { date: "2026-05-02", type: "expense", category: "Makanan", amount: 85000, note: "Makan siang & kopi", wallet: "Pribadi" },
                 { date: "2026-05-03", type: "expense", category: "Transportasi", amount: 50000, note: "Bensin motor", wallet: "Pribadi" },
                 { date: "2026-05-05", type: "expense", category: "Tagihan", amount: 350000, note: "Bayar internet", wallet: "Pribadi" },
-                { date: "2026-05-07", type: "income", category: "Freelance", amount: 1200000, note: "Project desain", wallet: "Bisnis" },
-                { date: "2026-05-09", type: "expense", category: "Belanja", amount: 275000, note: "Belanja bulanan", wallet: "Pribadi" }
+                { date: "2026-05-07", type: "income", category: "Freelance", amount: 1200000, note: "Project desain web", wallet: "Bisnis" },
+                { date: "2026-05-09", type: "expense", category: "Belanja", amount: 275000, note: "Belanja dapur bulanan", wallet: "Pribadi" }
             ],
             budgets: {
                 "Makanan": 1000000,
@@ -222,7 +237,7 @@
                 FONNTE_TOKEN: "",
                 BOT_NUMBER: "628123456789",
                 USER_EMAIL: "owner@example.com",
-                APP_LOGO: "", // Default kosong (akan fallback ke ikon Lucide Wallet)
+                APP_LOGO: "", // Kosong berarti menggunakan ikon default
                 TEMPLATE_SUCCESS: "✅ *Pencatatan Berhasil!*\n\n📂 *KANTONG: {wallet}*\n💰 *TIPE: {type}*\n📝 Kategori: {category}\n💬 Catatan: {note}\n💸 Nominal: *Rp{amount}*",
                 TEMPLATE_OVER_BUDGET: "⚠️ *WARNING BUDGET JEBOL!* ⚠️\n\nPengeluaran Anda pada kategori *{category}* telah melebihi batas anggaran bulanan!\n\n💸 Terpakai: *Rp{spent}*\n📊 Batas Anggaran: *Rp{limit}*",
                 TEMPLATE_WARN_BUDGET: "⚠️ *PERINGATAN HEMAT!* ⚠️\n\nPengeluaran kategori *{category}* sudah mencapai *{ratio}%* dari batas anggaran bulanan Anda.",
@@ -230,36 +245,24 @@
             }
         };
 
-        // --- KONFIGURASI UTAMA JALUR REST API ---
+        // --- KONFIGURASI REST API GOOGLE SHEETS ---
         const CONFIG = {
             API_URL: "https://script.google.com/macros/s/AKfycbzfLQt-M4gGzp2fNlrWNuDqZUs0igZWSv-jGuN_prZXqifOy9c23iClAddgVDYcRnASsg/exec",
             BOT_NUMBER: "628123456789"
-        };
-
-        const CATEGORY_ICONS = {
-            'Gaji': { icon: 'briefcase', bg: 'bg-green-100', text: 'text-green-600' },
-            'Freelance': { icon: 'award', bg: 'bg-emerald-100', text: 'text-emerald-600' },
-            'Makanan': { icon: 'coffee', bg: 'bg-amber-100', text: 'text-amber-600' },
-            'Transportasi': { icon: 'car', bg: 'bg-blue-100', text: 'text-blue-600' },
-            'Tagihan': { icon: 'lightning', bg: 'bg-purple-100', text: 'text-purple-600' },
-            'Belanja': { icon: 'shopping-bag', bg: 'bg-rose-100', text: 'text-rose-600' },
-            'Pendidikan': { icon: 'book-open', bg: 'bg-indigo-100', text: 'text-indigo-600' },
-            'Kesehatan': { icon: 'heart', bg: 'bg-red-100', text: 'text-red-600' },
-            'Lainnya': { icon: 'more-horizontal', bg: 'bg-slate-100', text: 'text-slate-600' }
         };
 
         let state = {
             view: 'home',
             data: JSON.parse(JSON.stringify(DUMMY_DATA)),
             isUsingDemo: true,
-            subTab: 'daily',
+            subTab: 'daily', // Sub-tabs: daily, calendar, yearly, budget
             isLoading: false,
             enteredPin: ""
         };
 
         const formatIDR = (val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val);
 
-        // --- RENDER LOGO DINAMIS (Kustom Gambar / Ikon Fallback) ---
+        // --- RENDER LOGO DINAMIS (Logo Kustom / Ikon Dompet Default) ---
         function renderLogo(sizeClass = "w-10 h-10", iconSize = "w-5 h-5") {
             const logoUrl = state.data.settings.APP_LOGO || "";
             if (logoUrl && logoUrl.trim() !== "" && logoUrl.startsWith("http")) {
@@ -290,7 +293,7 @@
             lucide.createIcons();
         }
 
-        // --- PENGELOLAAN SISTEM PIN KEAMANAN ---
+        // --- SISTEM PEMROSESAN PIN KEAMANAN ---
         function focusPinInput() {
             const input = document.getElementById('real-pin-input');
             if (input) {
@@ -298,7 +301,6 @@
             }
         }
 
-        // Penanganan input dari keyboard bawaan ponsel
         function handlePinInput(val) {
             val = val.replace(/[^0-9]/g, '');
             state.enteredPin = val;
@@ -329,17 +331,17 @@
         }
 
         async function requestForgotPin() {
-            showToast("Mengirimkan PIN keamanan...", "success");
+            showToast("Mengirimkan PIN aktif ke WA & Email...", "success");
             try {
                 const response = await fetchWithTimeout(`${CONFIG.API_URL}?action=forgotPin`, { timeout: 5000 });
                 const result = await response.json();
                 if (result && result.status === 'success') {
-                    showToast("PIN berhasil dikirim ke WA & Email!", "success");
+                    showToast("PIN berhasil terkirim!", "success");
                 } else {
                     throw new Error("Gagal");
                 }
             } catch (err) {
-                showToast("PIN keamanan terkirim ke WhatsApp pemilik (123456)!", "success");
+                showToast("PIN terkirim ke WhatsApp Anda (123456)!", "success");
             }
         }
 
@@ -368,7 +370,7 @@
                 if (result && result.status === 'success') {
                     document.getElementById('pin-lockscreen').classList.add('hidden');
                     sessionStorage.setItem('authenticated_pin', 'true');
-                    showToast("Sesi Keamanan Terverifikasi!", "success");
+                    showToast("Sesi Verifikasi Keamanan Berhasil!", "success");
                     fetchDashboardData();
                 } else {
                     triggerPinShake();
@@ -377,7 +379,7 @@
                 if (state.enteredPin === "123456") {
                     document.getElementById('pin-lockscreen').classList.add('hidden');
                     sessionStorage.setItem('authenticated_pin', 'true');
-                    showToast("Sesi Demo Terbuka!", "success");
+                    showToast("Sesi Demo Berhasil Terbuka!", "success");
                     fetchDashboardData();
                 } else {
                     triggerPinShake();
@@ -396,7 +398,7 @@
             }, 500);
         }
 
-        // --- PEMBANTU KONEKSI DENGAN TIMEOUT ---
+        // --- FETCH DENGAN TIMEOUT HELPER ---
         async function fetchWithTimeout(resource, options = {}) {
             const { timeout = 4000 } = options;
             const controller = new AbortController();
@@ -414,26 +416,26 @@
             }
         }
 
-        // --- AMBIL DATA LIVE DARI GOOGLE APPS SCRIPT ---
+        // --- AMBIL DATA REAL-TIME DARI GOOGLE APPS SCRIPT ---
         async function fetchDashboardData() {
             state.isLoading = true;
             try {
                 const response = await fetchWithTimeout(`${CONFIG.API_URL}?action=getDashboard`, { timeout: 4000 });
-                if (!response.ok) throw new Error("Gagal menyambung.");
+                if (!response.ok) throw new Error("Koneksi gagal.");
                 const result = await response.json();
                 
                 if (result && result.status === 'success') {
                     state.data = result;
                     state.isUsingDemo = false;
                     CONFIG.BOT_NUMBER = result.settings.BOT_NUMBER || CONFIG.BOT_NUMBER;
-                    showToast("Sinkronisasi Cloud Berhasil!", "success");
+                    showToast("Pangkalan Data Sinkron Real-time!", "success");
                 } else {
-                    throw new Error("Format respons tidak sepadan.");
+                    throw new Error("Format tidak sesuai.");
                 }
             } catch (error) {
-                console.warn("Rangkaian luar talian. Menggunakan pangkalan data tempatan.");
+                console.warn("Database cloud tidak merespon. Menggunakan data lokal.");
                 state.isUsingDemo = true;
-                showToast("Menggunakan Database Offline (Simulasi)", "warn");
+                showToast("Menggunakan Database Demo (Offline Mode)", "warn");
             } finally {
                 state.isLoading = false;
                 document.getElementById('global-loader')?.classList.add('hidden');
@@ -442,42 +444,21 @@
             }
         }
 
-        // --- SISTEM NOTIFIKASI TOAST ---
-        function showToast(message, type = "success") {
-            const toast = document.getElementById('toast');
-            const toastMsg = document.getElementById('toast-message');
-            const toastIconBox = document.getElementById('toast-icon-box');
-            
-            toastMsg.innerText = message;
-            if (type === "success") {
-                toastIconBox.className = "w-5 h-5 bg-green-500 rounded-full flex items-center justify-center shrink-0";
-                toastIconBox.innerHTML = `<i data-lucide="check" class="w-3 h-3 text-white"></i>`;
-            } else {
-                toastIconBox.className = "w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center shrink-0";
-                toastIconBox.innerHTML = `<i data-lucide="alert-circle" class="w-3 h-3 text-white"></i>`;
-            }
-            
-            lucide.createIcons();
-            toast.classList.remove('translate-y-[-100px]', 'opacity-0', 'pointer-events-none');
-            setTimeout(() => {
-                toast.classList.add('translate-y-[-100px]', 'opacity-0', 'pointer-events-none');
-            }, 3000);
-        }
-
-        // --- PAPARAN UTAMA (DASHBOARD VIEW) ---
+        // --- HALAMAN UTAMA: DASHBOARD VIEW ---
         const DashboardView = () => {
             const stats = state.data.stats;
             
-            const walletPeribadi = state.data.transactions
+            // Perhitungan saldo tiap kantong alokasi secara dinamis
+            const walletPribadi = state.data.transactions
                 .filter(t => t.wallet === 'Pribadi' || t.wallet === 'Peribadi')
                 .reduce((acc, t) => t.type === 'income' ? acc + t.amount : acc - t.amount, 0);
 
-            const walletPerniagaan = state.data.transactions
-                .filter(t => t.wallet === 'Bisnis' || t.wallet === 'Perniagaan' || t.wallet === 'Bisnis')
+            const walletBisnis = state.data.transactions
+                .filter(t => t.wallet === 'Bisnis' || t.wallet === 'Perniagaan')
                 .reduce((acc, t) => t.type === 'income' ? acc + t.amount : acc - t.amount, 0);
 
-            const walletSimpanan = state.data.transactions
-                .filter(t => t.wallet === 'Tabungan' || t.wallet === 'Simpanan' || t.wallet === 'Tabungan')
+            const walletTabungan = state.data.transactions
+                .filter(t => t.wallet === 'Tabungan' || t.wallet === 'Simpanan')
                 .reduce((acc, t) => t.type === 'income' ? acc + t.amount : acc - t.amount, 0);
 
             const connectionBanner = state.isUsingDemo ? `
@@ -492,7 +473,7 @@
                         </div>
                     </div>
                     <button onclick="fetchDashboardData()" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition-all self-start sm:self-auto shrink-0">
-                        Hubungkan Semula API
+                        Hubungkan Ulang API
                     </button>
                 </div>
             ` : `
@@ -512,7 +493,7 @@
                     
                     ${connectionBanner}
 
-                    <!-- Header Ringkasan Utama -->
+                    <!-- Top Header Summary -->
                     <div class="flex justify-between items-center">
                         <div>
                             <p class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-1">DANA DOMPET SAYA</p>
@@ -528,26 +509,26 @@
                         </div>
                     </div>
 
-                    <!-- Kad Baki Premium -->
+                    <!-- Fintech Balance Card -->
                     <div class="bg-dana rounded-[36px] p-8 text-white relative overflow-hidden card-shadow">
                         <div class="relative z-10 space-y-8">
                             <div class="flex justify-between items-start">
                                 <div>
-                                    <p class="text-blue-100 font-semibold opacity-80">Jumlah Baki Sisa</p>
+                                    <p class="text-blue-100 font-semibold opacity-80">Total Saldo Sisa</p>
                                     <h1 class="text-4xl lg:text-5xl font-extrabold mt-1 tracking-tight">${formatIDR(stats.balance)}</h1>
                                 </div>
                                 <span class="px-4 py-1.5 bg-white/20 rounded-full text-xs font-bold backdrop-blur-md flex items-center gap-1">
                                     <span class="w-2 h-2 ${state.isUsingDemo ? 'bg-amber-400' : 'bg-emerald-400'} rounded-full"></span> 
-                                    ${state.isUsingDemo ? 'Mod Luar Talian' : 'Sinkronisasi Awan'}
+                                    ${state.isUsingDemo ? 'Mode Offline' : 'Sinkronisasi Cloud'}
                                 </span>
                             </div>
                             <div class="grid grid-cols-2 gap-4">
                                 <div class="bg-white/10 p-5 rounded-3xl backdrop-blur-md border border-white/10">
-                                    <p class="text-[10px] uppercase font-bold text-blue-100 mb-1.5 tracking-wider">Pendapatan Bulan Ini</p>
+                                    <p class="text-[10px] uppercase font-bold text-blue-100 mb-1.5 tracking-wider">Pemasukan Bulan Ini</p>
                                     <p class="text-lg lg:text-xl font-extrabold">${formatIDR(stats.income)}</p>
                                 </div>
                                 <div class="bg-white/10 p-5 rounded-3xl backdrop-blur-md border border-white/10">
-                                    <p class="text-[10px] uppercase font-bold text-blue-100 mb-1.5 tracking-wider">Perbelanjaan Bulan Ini</p>
+                                    <p class="text-[10px] uppercase font-bold text-blue-100 mb-1.5 tracking-wider">Pengeluaran Bulan Ini</p>
                                     <p class="text-lg lg:text-xl font-extrabold">${formatIDR(stats.expense)}</p>
                                 </div>
                             </div>
@@ -556,10 +537,11 @@
                         <div class="absolute -left-20 -bottom-20 w-64 h-64 bg-blue-400/20 rounded-full blur-2xl"></div>
                     </div>
 
-                    <!-- MULTI-WALLET: KANTONG ALOKASI KEWANGAN -->
+                    <!-- MULTI-WALLET: ALOKASI KAS -->
                     <div class="space-y-3">
                         <h3 class="text-sm font-extrabold text-slate-400 uppercase tracking-wider">Kantong Alokasi Keuangan</h3>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <!-- Kantong Pribadi -->
                             <div class="bg-white p-6 rounded-[28px] border border-slate-100 card-shadow flex items-center justify-between group hover:border-blue-200 transition-all">
                                 <div class="flex items-center gap-4">
                                     <div class="w-12 h-12 bg-blue-50 text-dana rounded-2xl flex items-center justify-center shrink-0">
@@ -567,10 +549,11 @@
                                     </div>
                                     <div>
                                         <p class="text-xs font-bold text-slate-400 uppercase">Kantong Pribadi</p>
-                                        <h4 class="text-lg font-extrabold text-slate-900 mt-1">${formatIDR(walletPeribadi)}</h4>
+                                        <h4 class="text-lg font-extrabold text-slate-900 mt-1">${formatIDR(walletPribadi)}</h4>
                                     </div>
                                 </div>
                             </div>
+                            <!-- Kas Bisnis -->
                             <div class="bg-white p-6 rounded-[28px] border border-slate-100 card-shadow flex items-center justify-between group hover:border-emerald-200 transition-all">
                                 <div class="flex items-center gap-4">
                                     <div class="w-12 h-12 bg-emerald-50 text-emerald-500 rounded-2xl flex items-center justify-center shrink-0">
@@ -578,10 +561,11 @@
                                     </div>
                                     <div>
                                         <p class="text-xs font-bold text-slate-400 uppercase">Kas Bisnis / Usaha</p>
-                                        <h4 class="text-lg font-extrabold text-slate-900 mt-1">${formatIDR(walletPerniagaan)}</h4>
+                                        <h4 class="text-lg font-extrabold text-slate-900 mt-1">${formatIDR(walletBisnis)}</h4>
                                     </div>
                                 </div>
                             </div>
+                            <!-- Kantong Tabungan -->
                             <div class="bg-white p-6 rounded-[28px] border border-slate-100 card-shadow flex items-center justify-between group hover:border-purple-200 transition-all">
                                 <div class="flex items-center gap-4">
                                     <div class="w-12 h-12 bg-purple-50 text-purple-500 rounded-2xl flex items-center justify-center shrink-0">
@@ -589,14 +573,14 @@
                                     </div>
                                     <div>
                                         <p class="text-xs font-bold text-slate-400 uppercase">Kantong Tabungan</p>
-                                        <h4 class="text-lg font-extrabold text-slate-900 mt-1">${formatIDR(walletSimpanan)}</h4>
+                                        <h4 class="text-lg font-extrabold text-slate-900 mt-1">${formatIDR(walletTabungan)}</h4>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- TABS PENGURUSAN DATA LANJUTAN -->
+                    <!-- TABS AREA -->
                     <div class="bg-white rounded-[32px] border border-slate-100 card-shadow overflow-hidden">
                         <div class="flex border-b border-slate-100 bg-slate-50/50 p-2">
                             <button onclick="setSubTab('daily')" class="flex-1 py-3 rounded-2xl font-bold text-sm transition-all ${state.subTab === 'daily' ? 'bg-white text-dana shadow-xs' : 'text-slate-400 hover:text-slate-600'}" id="tab-btn-daily">Harian</button>
@@ -606,16 +590,16 @@
                         </div>
 
                         <div class="p-6">
-                            <!-- TAB: DAILY (Mutasi Harian Terperinci) -->
+                            <!-- TAB: DAILY -->
                             <div id="view-tab-daily" class="${state.subTab === 'daily' ? '' : 'hidden'} space-y-5 animate-fade">
                                 <div class="flex justify-between items-center mb-4">
                                     <h3 class="font-bold text-slate-900">Arus Kas Harian</h3>
-                                    <span class="text-xs text-slate-400 font-semibold">${state.data.transactions.length} Rekor Transaksi</span>
+                                    <span class="text-xs text-slate-400 font-semibold">${state.data.transactions.length} Transaksi Terdaftar</span>
                                 </div>
                                 <div class="space-y-4">
                                     ${state.data.transactions.length > 0 ? state.data.transactions.slice(-6).reverse().map(t => {
                                         const meta = CATEGORY_ICONS[t.category] || CATEGORY_ICONS['Lainnya'];
-                                        let displayWallet = t.wallet === 'Pribadi' ? 'Pribadi' : (t.wallet === 'Bisnis' ? 'Bisnis' : (t.wallet === 'Tabungan' ? 'Tabungan' : t.wallet));
+                                        let displayWallet = t.wallet === 'Pribadi' || t.wallet === 'Peribadi' ? 'Pribadi' : (t.wallet === 'Bisnis' || t.wallet === 'Perniagaan' ? 'Bisnis' : 'Tabungan');
                                         return `
                                             <div class="flex items-center justify-between p-3 rounded-2xl hover:bg-slate-50 transition-all cursor-pointer group animate-fade">
                                                 <div class="flex items-center gap-4">
@@ -625,7 +609,7 @@
                                                     <div>
                                                         <p class="font-bold text-slate-850 text-sm">${t.category}</p>
                                                         <div class="flex items-center gap-2 mt-0.5">
-                                                            <span class="px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded text-[9px] font-extrabold uppercase">${displayWallet || 'Pribadi'}</span>
+                                                            <span class="px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded text-[9px] font-extrabold uppercase">${displayWallet}</span>
                                                             <span class="text-[11px] text-slate-400 font-semibold">${t.note}</span>
                                                         </div>
                                                     </div>
@@ -638,7 +622,7 @@
                                                 </div>
                                             </div>
                                         `;
-                                    }).join('') : '<p class="text-center py-8 text-slate-400 font-semibold text-sm">Belum ada rekod transaksi dalam pangkalan data.</p>'}
+                                    }).join('') : '<p class="text-center py-8 text-slate-400 font-semibold text-sm">Belum ada transaksi di database.</p>'}
                                 </div>
                             </div>
 
@@ -670,9 +654,9 @@
                             <!-- TAB: BUDGET -->
                             <div id="view-tab-budget" class="${state.subTab === 'budget' ? '' : 'hidden'} space-y-6 animate-fade">
                                 <div class="flex justify-between items-center">
-                                    <h3 class="font-bold text-slate-900">Anggaran Kategori Perbelanjaan</h3>
+                                    <h3 class="font-bold text-slate-900">Batas Anggaran Kategori</h3>
                                     <button onclick="openModal('addBudget')" class="text-xs text-dana font-bold flex items-center gap-1 hover:underline">
-                                        <i data-lucide="plus" class="w-3.5 h-3.5"></i> Tetapkan Anggaran
+                                        <i data-lucide="plus" class="w-3.5 h-3.5"></i> Atur Budget
                                     </button>
                                 </div>
                                 <div class="space-y-4">
@@ -692,11 +676,11 @@
                                                     <div class="h-full rounded-full transition-all duration-500 ${ratio > 90 ? 'bg-rose-500' : ratio > 65 ? 'bg-amber-400' : 'bg-dana'}" style="width: ${ratio}%"></div>
                                                 </div>
                                                 <p class="text-[10px] text-right font-semibold ${ratio > 90 ? 'text-rose-500' : 'text-slate-400'}">
-                                                    Baki Anggaran: ${formatIDR(Math.max(limit - spent, 0))}
+                                                    Sisa Anggaran: ${formatIDR(Math.max(limit - spent, 0))}
                                                 </p>
                                             </div>
                                         `;
-                                    }).join('') : '<p class="text-center py-6 text-slate-400 text-sm">Belum ada had anggaran ditetapkan.</p>'}
+                                    }).join('') : '<p class="text-center py-6 text-slate-400 text-sm">Belum ada batas anggaran ditetapkan.</p>'}
                                 </div>
                             </div>
                         </div>
@@ -705,17 +689,17 @@
             `;
         };
 
-        // --- SEJARAH TRANSAKSI (HISTORY VIEW) ---
+        // --- HALAMAN RIWAYAT TRANSAKSI (HISTORY VIEW) ---
         const HistoryView = () => `
             <div class="max-w-6xl mx-auto p-4 lg:p-10 space-y-8 animate-fade">
                 <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                     <div>
                         <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">PENCATATAN</p>
-                        <h2 class="text-2xl font-black text-slate-900">Sejarah Transaksi</h2>
+                        <h2 class="text-2xl font-black text-slate-900">Riwayat Transaksi</h2>
                     </div>
                     <div class="flex gap-2">
                         <button onclick="exportData('csv')" class="px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-2 hover:bg-slate-50 transition-all shadow-xs">
-                            <i data-lucide="sheet" class="w-4 h-4 text-green-500"></i> Export CSV
+                            <i data-lucide="sheet" class="w-4 h-4 text-green-500"></i> Ekspor CSV
                         </button>
                     </div>
                 </div>
@@ -728,8 +712,8 @@
                     <div>
                         <select id="type-filter" onchange="filterHistory()" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-sm outline-none focus:border-dana transition-all">
                             <option value="all">Semua Tipe</option>
-                            <option value="income">Hanya Pendapatan (+)</option>
-                            <option value="expense">Hanya Perbelanjaan (-)</option>
+                            <option value="income">Hanya Pemasukan (+)</option>
+                            <option value="expense">Hanya Pengeluaran (-)</option>
                         </select>
                     </div>
                 </div>
@@ -742,13 +726,13 @@
                                     <th class="p-6">Tanggal</th>
                                     <th class="p-6">Kategori</th>
                                     <th class="p-6">Catatan</th>
-                                    <th class="p-6 text-right">Jumlah</th>
+                                    <th class="p-6 text-right">Nominal</th>
                                     <th class="p-6 text-center">Dompet</th>
                                 </tr>
                             </thead>
                             <tbody id="history-table-body" class="divide-y divide-slate-50 text-sm">
                                 ${state.data.transactions.map(t => {
-                                    let displayWallet = t.wallet === 'Pribadi' ? 'Pribadi' : (t.wallet === 'Bisnis' ? 'Bisnis' : (t.wallet === 'Tabungan' ? 'Tabungan' : t.wallet));
+                                    let displayWallet = t.wallet === 'Pribadi' || t.wallet === 'Peribadi' ? 'Pribadi' : (t.wallet === 'Bisnis' || t.wallet === 'Perniagaan' ? 'Bisnis' : 'Tabungan');
                                     return `
                                         <tr class="hover:bg-slate-50/50 transition-colors animate-fade" data-type="${t.type}" data-note="${t.note.toLowerCase()}">
                                             <td class="p-6 font-medium text-slate-500">${t.date}</td>
@@ -759,7 +743,7 @@
                                             </td>
                                             <td class="p-6 text-center">
                                                 <span class="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-lg text-[10px] font-bold uppercase">
-                                                    ${displayWallet || 'Pribadi'}
+                                                    ${displayWallet}
                                                 </span>
                                             </td>
                                         </tr>
@@ -772,7 +756,7 @@
             </div>
         `;
 
-        // --- ANALISIS PERBELANJAAN (ANALYTICS VIEW) ---
+        // --- HALAMAN ANALISIS PERBELANJAAN (ANALYTICS VIEW) ---
         const AnalyticsView = () => `
             <div class="max-w-6xl mx-auto p-4 lg:p-10 space-y-8 animate-fade">
                 <div>
@@ -782,7 +766,7 @@
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div class="lg:col-span-2 bg-white p-6 lg:p-8 rounded-[40px] border border-slate-100 card-shadow">
-                        <h3 class="text-lg font-bold text-slate-900 mb-6">Pecahan Perbelanjaan Bulanan</h3>
+                        <h3 class="text-lg font-bold text-slate-900 mb-6">Porsi Pengeluaran Bulanan</h3>
                         <div id="pie-chart" class="min-h-[280px]"></div>
                     </div>
 
@@ -790,12 +774,12 @@
                         <div class="space-y-4">
                             <div class="flex items-center gap-2 text-dana">
                                 <i data-lucide="sparkles" class="w-5 h-5"></i>
-                                <h3 class="text-lg font-extrabold">iMers Wallet AI Insights</h3>
+                                <h3 class="text-lg font-extrabold">iMers AI Insights</h3>
                             </div>
-                            <p class="text-xs text-slate-500 leading-relaxed font-semibold">Berdasarkan data aliran tunai semasa:</p>
+                            <p class="text-xs text-slate-500 leading-relaxed font-semibold">Berdasarkan data aliran kas saat ini:</p>
                             <div class="p-4 bg-blue-50/50 rounded-2xl border border-blue-100 text-xs leading-relaxed">
                                 <p class="text-dana font-bold uppercase mb-1">Rekomendasi Bulanan</p>
-                                <p class="text-slate-600 font-semibold">Perbelanjaan kategori belanja anda didapati mendominasi baki anggaran. Menetapkan had budget mingguan boleh membantu meningkatkan simpanan sehingga 15%.</p>
+                                <p class="text-slate-600 font-semibold">Pengeluaran kategori belanja Anda mendominasi sisa anggaran. Menetapkan batas anggaran mingguan dapat menghemat cashflow hingga 15%.</p>
                             </div>
                         </div>
                         <p class="text-[10px] text-slate-400 font-bold">Generasi rekomendasi real-time</p>
@@ -804,12 +788,12 @@
             </div>
         `;
 
-        // --- PANEL TETAPAN COPYWRITING DAN BOT WA (PROFILE VIEW) ---
+        // --- HALAMAN INTEGRASI & COPYWRITING (PROFILE VIEW) ---
         const ProfileView = () => `
             <div class="max-w-6xl mx-auto p-4 lg:p-10 space-y-8 animate-fade pb-10">
                 <div>
                     <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">INTEGRASI</p>
-                    <h2 class="text-2xl font-black text-slate-900">Tetapan & Konfigurasi Bot</h2>
+                    <h2 class="text-2xl font-black text-slate-900">Pengaturan & Konfigurasi Bot</h2>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -835,11 +819,11 @@
                                 <p class="text-[9px] text-slate-400 mt-1 font-semibold">Tautkan URL gambar logo kustom kamu sendiri di sini untuk mengganti logo default.</p>
                             </div>
                             <div>
-                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">PIN Kemasukan Baru (6 Digit)</label>
-                                <input type="text" id="cfg-user-pin" placeholder="Biar kosong untuk guna PIN sedia ada" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs outline-none focus:border-dana font-mono">
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">PIN Keamanan Baru (6 Digit)</label>
+                                <input type="text" id="cfg-user-pin" placeholder="Biar kosong untuk menggunakan PIN saat ini" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs outline-none focus:border-dana font-mono">
                             </div>
                             <div>
-                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">Email Pemilik (Tujuan Laporan Mingguan)</label>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">Email Pemilik (Tujuan Laporan Keuangan)</label>
                                 <input type="email" id="cfg-user-email" value="${state.data.settings.USER_EMAIL || ''}" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs outline-none focus:border-dana font-mono">
                             </div>
                             
@@ -853,8 +837,8 @@
                     <div class="lg:col-span-2 bg-white p-6 lg:p-8 rounded-[40px] border border-slate-100 card-shadow space-y-6">
                         <div class="flex justify-between items-center border-b border-slate-50 pb-4">
                             <div>
-                                <h3 class="text-lg font-bold text-slate-900">2. Templat Mesej Balasan WA Bot</h3>
-                                <p class="text-xs text-slate-400 mt-1 font-semibold">Tentukan copywriting mesej maklum balas bot mengikut gaya penulisan anda.</p>
+                                <h3 class="text-lg font-bold text-slate-900">2. Templat Pesan Balasan Bot WA</h3>
+                                <p class="text-xs text-slate-400 mt-1 font-semibold">Tentukan copywriting balasan chat asisten bot sesuai gaya bahasa tokomu.</p>
                             </div>
                             <button onclick="triggerWeeklyReportManual()" class="px-4 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-md shadow-green-100 shrink-0">
                                 <i data-lucide="send" class="w-3.5 h-3.5"></i> Tes Kirim Report WA
@@ -863,27 +847,27 @@
 
                         <div class="space-y-4">
                             <div>
-                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1.5">Mesej Rekod Berjaya</label>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1.5">Pesan Pencatatan Berhasil</label>
                                 <textarea id="tmpl-success" rows="4" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-semibold outline-none focus:border-dana font-mono leading-relaxed">${state.data.settings.TEMPLATE_SUCCESS || ''}</textarea>
-                                <p class="text-[9px] text-slate-400 mt-1 font-bold">Pemegang tempat: {wallet}, {type}, {category}, {note}, {amount}</p>
+                                <p class="text-[9px] text-slate-400 mt-1 font-bold">Variabel: {wallet}, {type}, {category}, {note}, {amount}</p>
                             </div>
 
                             <div>
-                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1.5">Amaran Anggaran Melebihi Had (Over-Budget)</label>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1.5">Peringatan Anggaran Jebol (Over-Budget)</label>
                                 <textarea id="tmpl-over-budget" rows="4" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-semibold outline-none focus:border-dana font-mono leading-relaxed">${state.data.settings.TEMPLATE_OVER_BUDGET || ''}</textarea>
-                                <p class="text-[9px] text-slate-400 mt-1 font-bold">Pemegang tempat: {category}, {spent}, {limit}</p>
+                                <p class="text-[9px] text-slate-400 mt-1 font-bold">Variabel: {category}, {spent}, {limit}</p>
                             </div>
 
                             <div>
-                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1.5">Amaran Had Anggaran Hampir Penuh (>=80%)</label>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1.5">Peringatan Anggaran Hampir Melebihi Batas (>=80%)</label>
                                 <textarea id="tmpl-warn-budget" rows="3" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-semibold outline-none focus:border-dana font-mono leading-relaxed">${state.data.settings.TEMPLATE_WARN_BUDGET || ''}</textarea>
-                                <p class="text-[9px] text-slate-400 mt-1 font-bold">Pemegang tempat: {category}, {ratio}, {spent}, {limit}</p>
+                                <p class="text-[9px] text-slate-400 mt-1 font-bold">Variabel: {category}, {ratio}, {spent}, {limit}</p>
                             </div>
 
                             <div>
                                 <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1.5">Templat Laporan Mingguan</label>
                                 <textarea id="tmpl-weekly" rows="4" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-semibold outline-none focus:border-dana font-mono leading-relaxed">${state.data.settings.TEMPLATE_WEEKLY_REPORT || ''}</textarea>
-                                <p class="text-[9px] text-slate-400 mt-1 font-bold">Pemegang tempat: {income}, {expense}, {balance}</p>
+                                <p class="text-[9px] text-slate-400 mt-1 font-bold">Variabel: {income}, {expense}, {balance}</p>
                             </div>
                         </div>
                     </div>
@@ -966,7 +950,7 @@
                 const response = await fetchWithTimeout(`${CONFIG.API_URL}?${queryParams.toString()}`, { timeout: 5000 });
                 const result = await response.json();
                 if (result && result.status === 'success') {
-                    showToast("Semua Konfigurasi Berjaya Disimpan!", "success");
+                    showToast("Semua Konfigurasi Berhasil Disimpan!", "success");
                     fetchDashboardData();
                 }
             } catch (err) {
@@ -979,15 +963,15 @@
 
         // --- TRIGGER LAPORAN MINGGUAN SECARA MANUAL ---
         async function triggerWeeklyReportManual() {
-            showToast("Menghantar Laporan Mingguan...", "success");
+            showToast("Mengirim Laporan Mingguan...", "success");
             try {
                 const response = await fetchWithTimeout(`${CONFIG.API_URL}?action=triggerWeeklyReport`, { timeout: 5000 });
                 const result = await response.json();
                 if (result && result.status === 'success') {
-                    showToast("Laporan Berjaya Dihantar ke WA & Email!", "success");
+                    showToast("Laporan Berhasil Dikirim ke WA & Email!", "success");
                 }
             } catch (err) {
-                showToast("Pengesahan Laporan Mingguan Berjaya Dijalankan!", "success");
+                showToast("Laporan Mingguan Berhasil Dijalankan!", "success");
             }
         }
 
@@ -1060,13 +1044,13 @@
 
             const options = {
                 series: [{
-                    name: 'Perbelanjaan',
+                    name: 'Pengeluaran',
                     data: [1500000, 2200000, 1800000, 2500000, 1900000, 3100000, 2400000]
                 }],
                 chart: { height: 260, type: 'bar', toolbar: { show: false }, fontFamily: 'Plus Jakarta Sans' },
                 colors: ['#108EE9'],
                 plotOptions: { bar: { borderRadius: 10, columnWidth: '45%' } },
-                xaxis: { categories: ['Jan', 'Feb', 'Mac', 'Apr', 'Mei', 'Jun', 'Jul'] },
+                xaxis: { categories: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul'] },
                 grid: { show: false }
             };
             new ApexCharts(el, options).render();
@@ -1106,7 +1090,7 @@
             new ApexCharts(el, options).render();
         }
 
-        // --- SISTEM MODAL REKOD MANUAL ---
+        // --- SISTEM MODAL PENCATATAN MANUAL ---
         function openModal(type) {
             const overlay = document.getElementById('modal-overlay');
             const box = document.getElementById('modal-box');
@@ -1123,8 +1107,8 @@
                     </div>
                     <div class="space-y-4">
                         <div class="flex p-1 bg-slate-100 rounded-2xl">
-                            <button id="m-exp" onclick="setModalType('expense')" class="flex-1 py-3 rounded-xl font-bold text-xs bg-white text-dana shadow-sm">Perbelanjaan</button>
-                            <button id="m-inc" onclick="setModalType('income')" class="flex-1 py-3 rounded-xl font-bold text-xs text-slate-400">Pendapatan</button>
+                            <button id="m-exp" onclick="setModalType('expense')" class="flex-1 py-3 rounded-xl font-bold text-xs bg-white text-dana shadow-sm">Pengeluaran</button>
+                            <button id="m-inc" onclick="setModalType('income')" class="flex-1 py-3 rounded-xl font-bold text-xs text-slate-400">Pemasukan</button>
                         </div>
                         <div>
                             <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">Kantong Dompet</label>
@@ -1235,7 +1219,7 @@
             state.data.stats = { balance: inc - exp, income: inc, expense: exp };
 
             closeModal();
-            showToast("Transaksi Berhasil Direkodkan!", "success");
+            showToast("Transaksi Berhasil Direkam!", "success");
             render();
         }
 
@@ -1244,11 +1228,11 @@
             const cat = document.getElementById('bg-category').value;
             const limit = parseInt(document.getElementById('bg-limit').value);
 
-            if (isNaN(limit) || limit <= 0) return showToast("Had anggaran tidak sah", "warn");
+            if (isNaN(limit) || limit <= 0) return showToast("Batas anggaran tidak valid", "warn");
 
             state.data.budgets[cat] = limit;
             closeModal();
-            showToast(`Had Anggaran Kategori ${cat} Dikemaskini!`, "success");
+            showToast(`Batas Anggaran Kategori ${cat} Diperbarui!`, "success");
             render();
         }
 
