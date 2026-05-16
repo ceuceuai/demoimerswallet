@@ -68,8 +68,8 @@
                 <div id="lockscreen-logo-container" class="cursor-pointer flex justify-center w-full" onclick="focusPinInput()">
                     <!-- Diisi otomatis oleh fungsi renderLogo() -->
                 </div>
-                <h2 class="text-xl font-extrabold text-white tracking-tight mt-4">Sistem Keamanan iMersWallet</h2>
-                <p class="text-xs text-slate-400 font-semibold">Silakan ketik PIN 6-digit Anda via keyboard HP atau tombol di bawah.</p>
+                <h2 class="text-3xl font-black mt-4"><span class="text-[#108EE9]">iMers</span><span class="text-[#00E5FF]">WALLET</span></h2>
+                <p class="text-sm text-slate-300 font-medium">Masukkan PIN 6-Digit</p>
             </div>
 
             <!-- Titik Penunjuk PIN (Mengetuk area ini akan fokus ke input HP) -->
@@ -251,13 +251,13 @@
             }
         };
 
-        // --- KONFIGURASI REST API GOOGLE SHEETS ---
+        // --- KONFIGURASI REST API GOOGLE SHEETS (SINKRON TAUTAN TERBARU) ---
         const CONFIG = {
             API_URL: "https://script.google.com/macros/s/AKfycbzfLQt-M4gGzp2fNlrWNuDqZUs0igZWSv-jGuN_prZXqifOy9c23iClAddgVDYcRnASsg/exec",
             BOT_NUMBER: "628123456789"
         };
 
-        // --- PEMETAAN IKON KATEGORI TRANSAKSI ---
+        // --- PEMETAAN IKON KATEGORI TRANSAKSI (Definisi Awal) ---
         const CATEGORY_ICONS = {
             'Gaji': { icon: 'briefcase', bg: 'bg-green-100', text: 'text-green-600' },
             'Freelance': { icon: 'award', bg: 'bg-emerald-100', text: 'text-emerald-600' },
@@ -270,7 +270,7 @@
             'Lainnya': { icon: 'more-horizontal', bg: 'bg-slate-100', text: 'text-slate-600' }
         };
 
-        // --- SISTEM NOTIFIKASI TOAST (Didefinisikan Di Awal Untuk Mencegah ReferenceError) ---
+        // --- SISTEM NOTIFIKASI TOAST (Definisi Awal) ---
         function showToast(message, type = "success") {
             const toast = document.getElementById('toast');
             const toastMsg = document.getElementById('toast-message');
@@ -308,8 +308,8 @@
             const logoUrl = state.data.settings.APP_LOGO || "";
             if (logoUrl && logoUrl.trim() !== "" && logoUrl.startsWith("http")) {
                 return `
-                    <div class="relative ${sizeClass} mx-auto">
-                        <img src="${logoUrl}" class="w-full h-full rounded-2xl object-cover shadow-md" alt="Logo" onerror="handleLogoError(this, '${sizeClass}', '${iconSize}')">
+                    <div class="relative ${sizeClass} mx-auto flex items-center justify-center">
+                        <img src="${logoUrl}" class="max-w-full max-h-full object-contain" alt="Logo" onerror="handleLogoError(this, '${sizeClass}', '${iconSize}')">
                     </div>
                 `;
             }
