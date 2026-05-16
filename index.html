@@ -36,7 +36,7 @@
         }
         .animate-fade { animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         
-        /* Animasi getar untuk input PIN salah */
+        /* Animasi getar jika input PIN salah */
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-10px); }
@@ -92,7 +92,7 @@
                 </button>
             </div>
 
-            <!-- Opsi Bantuan Jika Lupa PIN (PIN Default Dihapus dari UI) -->
+            <!-- Opsi Bantuan Jika Lupa PIN (Sembunyikan Angka Default Agar Rapi) -->
             <div class="text-center pt-2">
                 <button onclick="requestForgotPin()" class="text-xs text-dana hover:text-blue-300 font-bold tracking-wide transition-colors flex items-center gap-1.5 mx-auto">
                     <i data-lucide="key-round" class="w-3.5 h-3.5"></i> Lupa PIN? Kirim via WA & Email
@@ -209,7 +209,7 @@
                 { date: "2026-05-02", type: "expense", category: "Makanan", amount: 85000, note: "Makan dan kopi", wallet: "Pribadi" },
                 { date: "2026-05-03", type: "expense", category: "Transportasi", amount: 50000, note: "Bensin motor", wallet: "Pribadi" },
                 { date: "2026-05-05", type: "expense", category: "Tagihan", amount: 350000, note: "Bayar internet", wallet: "Pribadi" },
-                { date: "2026-05-07", type: "income", category: "Freelance", amount: 1200000, note: "Projek rekaan", wallet: "Bisnis" },
+                { date: "2026-05-07", type: "income", category: "Freelance", amount: 1200000, note: "Project desain", wallet: "Bisnis" },
                 { date: "2026-05-09", type: "expense", category: "Belanja", amount: 275000, note: "Belanja bulanan", wallet: "Pribadi" }
             ],
             budgets: {
@@ -290,7 +290,7 @@
             lucide.createIcons();
         }
 
-        // --- PENGURUSAN SISTEM PIN KESELAMATAN ---
+        // --- PENGELOLAAN SISTEM PIN KEAMANAN ---
         function focusPinInput() {
             const input = document.getElementById('real-pin-input');
             if (input) {
@@ -328,7 +328,7 @@
         }
 
         async function requestForgotPin() {
-            showToast("Mengirimkan PIN keselamatan...", "success");
+            showToast("Mengirimkan PIN keamanan...", "success");
             try {
                 const response = await fetchWithTimeout(`${CONFIG.API_URL}?action=forgotPin`, { timeout: 5000 });
                 const result = await response.json();
@@ -338,7 +338,7 @@
                     throw new Error("Gagal");
                 }
             } catch (err) {
-                showToast("PIN keselamatan terkirim ke WhatsApp pemilik (123456)!", "success");
+                showToast("PIN keamanan terkirim ke WhatsApp pemilik (123456)!", "success");
             }
         }
 
@@ -395,7 +395,7 @@
             }, 500);
         }
 
-        // --- PEMBANTU SAMBUNGAN DENGAN TIMEOUT ---
+        // --- PEMBANTU KONEKSI DENGAN TIMEOUT ---
         async function fetchWithTimeout(resource, options = {}) {
             const { timeout = 4000 } = options;
             const controller = new AbortController();
@@ -472,11 +472,11 @@
                 .reduce((acc, t) => t.type === 'income' ? acc + t.amount : acc - t.amount, 0);
 
             const walletPerniagaan = state.data.transactions
-                .filter(t => t.wallet === 'Bisnis' || t.wallet === 'Perniagaan' || t.wallet === 'Bisnis')
+                .filter(t => t.wallet === 'Bisnis' || t.wallet === 'Bisnis')
                 .reduce((acc, t) => t.type === 'income' ? acc + t.amount : acc - t.amount, 0);
 
             const walletSimpanan = state.data.transactions
-                .filter(t => t.wallet === 'Tabungan' || t.wallet === 'Simpanan')
+                .filter(t => t.wallet === 'Tabungan' || t.wallet === 'Simpanan' || t.wallet === 'Tabungan')
                 .reduce((acc, t) => t.type === 'income' ? acc + t.amount : acc - t.amount, 0);
 
             const connectionBanner = state.isUsingDemo ? `
@@ -542,11 +542,11 @@
                             </div>
                             <div class="grid grid-cols-2 gap-4">
                                 <div class="bg-white/10 p-5 rounded-3xl backdrop-blur-md border border-white/10">
-                                    <p class="text-[10px] uppercase font-bold text-blue-100 mb-1.5 tracking-wider">Pendapatan Bulan Ini</p>
+                                    <p class="text-[10px] uppercase font-bold text-blue-100 mb-1.5 tracking-wider">Pemasukan Bulan Ini</p>
                                     <p class="text-lg lg:text-xl font-extrabold">${formatIDR(stats.income)}</p>
                                 </div>
                                 <div class="bg-white/10 p-5 rounded-3xl backdrop-blur-md border border-white/10">
-                                    <p class="text-[10px] uppercase font-bold text-blue-100 mb-1.5 tracking-wider">Perbelanjaan Bulan Ini</p>
+                                    <p class="text-[10px] uppercase font-bold text-blue-100 mb-1.5 tracking-wider">Pengeluaran Bulan Ini</p>
                                     <p class="text-lg lg:text-xl font-extrabold">${formatIDR(stats.expense)}</p>
                                 </div>
                             </div>
@@ -669,7 +669,7 @@
                             <!-- TAB: BUDGET -->
                             <div id="view-tab-budget" class="${state.subTab === 'budget' ? '' : 'hidden'} space-y-6 animate-fade">
                                 <div class="flex justify-between items-center">
-                                    <h3 class="font-bold text-slate-900">Anggaran Kategori Perbelanjaan</h3>
+                                    <h3 class="font-bold text-slate-900">Anggaran Kategori Pengeluaran</h3>
                                     <button onclick="openModal('addBudget')" class="text-xs text-dana font-bold flex items-center gap-1 hover:underline">
                                         <i data-lucide="plus" class="w-3.5 h-3.5"></i> Tetapkan Anggaran
                                     </button>
@@ -710,7 +710,7 @@
                 <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                     <div>
                         <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">PENCATATAN</p>
-                        <h2 class="text-2xl font-black text-slate-900">Sejarah Transaksi</h2>
+                        <h2 class="text-2xl font-black text-slate-900">Riwayat Transaksi</h2>
                     </div>
                     <div class="flex gap-2">
                         <button onclick="exportData('csv')" class="px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-2 hover:bg-slate-50 transition-all shadow-xs">
@@ -728,7 +728,7 @@
                         <select id="type-filter" onchange="filterHistory()" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-sm outline-none focus:border-dana transition-all">
                             <option value="all">Semua Tipe</option>
                             <option value="income">Hanya Pendapatan (+)</option>
-                            <option value="expense">Hanya Perbelanjaan (-)</option>
+                            <option value="expense">Hanya Pengeluaran (-)</option>
                         </select>
                     </div>
                 </div>
@@ -1016,8 +1016,8 @@
 
         function updateNavHighlights(view) {
             ['home', 'history', 'analytics', 'profile'].forEach(v => {
-                const sideBtn = document.getElementById(`side-${v}`);
-                const navBtn = document.getElementById(`nav-${v}`);
+                const sideBtn = document.getElementById('side-' + v);
+                const navBtn = document.getElementById('nav-' + v);
                 if (sideBtn) {
                     sideBtn.className = v === view 
                         ? "w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl font-bold text-sm text-dana bg-blue-50/50 transition-all"
@@ -1128,9 +1128,9 @@
                         <div>
                             <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">Kantong Dompet</label>
                             <select id="tx-wallet" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-semibold outline-none focus:border-dana font-sans">
-                                <option value="Pribadi">Kantong Peribadi</option>
-                                <option value="Bisnis">Kas Perniagaan</option>
-                                <option value="Tabungan">Kantong Simpanan</option>
+                                <option value="Pribadi">Kantong Pribadi</option>
+                                <option value="Bisnis">Kas Bisnis</option>
+                                <option value="Tabungan">Kantong Tabungan</option>
                             </select>
                         </div>
                         <div>
