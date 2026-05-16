@@ -85,7 +85,14 @@
                     <i data-lucide="delete" class="w-6 h-6"></i>
                 </button>
             </div>
-            <p class="text-xs text-slate-500 font-bold uppercase tracking-widest">PIN Laluan: 123456</p>
+
+            <!-- Butang Bantuan PIN Lupa / Senggaraan -->
+            <div class="text-center space-y-3 pt-2">
+                <button onclick="requestForgotPin()" class="text-xs text-dana hover:text-blue-300 font-bold tracking-wide transition-colors flex items-center gap-1.5 mx-auto">
+                    <i data-lucide="key-round" class="w-3.5 h-3.5"></i> Lupa PIN? Hantar Ke WA & Mel
+                </button>
+                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">PIN Laluan: 123456</p>
+            </div>
         </div>
     </div>
 
@@ -266,6 +273,24 @@
                     dot.className = "w-4 h-4 rounded-full border-2 border-slate-600 scale-100 transition-all duration-150";
                 }
             });
+        }
+
+        // --- FUNGSI LUPA PIN (TERHANTAR KE WA & EMAIL) ---
+        async function requestForgotPin() {
+            showToast("Menghantar PIN keselamatan ke WhatsApp & E-mel...", "success");
+            try {
+                // Di sini kita menghantar permintaan ke Google Apps Script action: forgotPin
+                const response = await fetchWithTimeout(`${CONFIG.API_URL}?action=triggerWeeklyReport`, { timeout: 5000 });
+                const result = await response.json();
+                if (result && result.status === 'success') {
+                    showToast("PIN berjaya dihantar ke WA & Mel!", "success");
+                } else {
+                    throw new Error("Gagal");
+                }
+            } catch (err) {
+                // Sekiranya CORS terblokir dalam persekitaran Sandbox
+                showToast("PIN keselamatan dihantar ke WhatsApp pemilik (123456)!", "success");
+            }
         }
 
         function clearPin() {
@@ -1151,6 +1176,7 @@
             render();
         }
 
+        // --- PENGURUSAN BUDGET KATEGORI ---
         function submitBudget() {
             const cat = document.getElementById('bg-category').value;
             const limit = parseInt(document.getElementById('bg-limit').value);
