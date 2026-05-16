@@ -82,7 +82,7 @@
                 <div class="w-4 h-4 rounded-full border-2 border-slate-600 transition-all duration-150"></div>
             </div>
 
-            <!-- Tombol Keypad Numerik Statis (Rapi & Sejajar) -->
+            <!-- Tombol Keypad Numerik Statis -->
             <div class="grid grid-cols-3 gap-6 w-full max-w-[280px]">
                 <button onclick="pressPinNumber(1)" class="w-16 h-16 rounded-full bg-slate-800 text-white font-black text-xl flex items-center justify-center hover:bg-slate-700 active:scale-95 transition-all outline-none">1</button>
                 <button onclick="pressPinNumber(2)" class="w-16 h-16 rounded-full bg-slate-800 text-white font-black text-xl flex items-center justify-center hover:bg-slate-700 active:scale-95 transition-all outline-none">2</button>
@@ -139,6 +139,12 @@
             <button onclick="router('profile')" id="side-profile" class="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl font-bold text-sm text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all">
                 <i data-lucide="user" class="w-5 h-5"></i>
                 <span>Bot WA & Pengaturan</span>
+            </button>
+            
+            <!-- Tombol Keluar Sesi Desktop -->
+            <button onclick="logout()" class="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl font-bold text-sm text-rose-500 hover:bg-rose-50 transition-all mt-4">
+                <i data-lucide="log-out" class="w-5 h-5"></i>
+                <span>Keluar Sesi</span>
             </button>
         </nav>
 
@@ -212,7 +218,7 @@
     </div>
 
     <script>
-        // --- DATA DUMMY SEBAGAI CADANGAN JIKA TERJADI OFFLINE ---
+        // --- DATA DUMMY SEBAGAI CADANGAN JIKA OFFLINE ---
         const DUMMY_DATA = {
             stats: { 
                 balance: 5440000, 
@@ -237,7 +243,7 @@
                 FONNTE_TOKEN: "",
                 BOT_NUMBER: "628123456789",
                 USER_EMAIL: "owner@example.com",
-                APP_LOGO: "", // Kosong berarti menggunakan ikon default
+                APP_LOGO: "", // Default kosong (akan fallback ke ikon Lucide Wallet)
                 TEMPLATE_SUCCESS: "✅ *Pencatatan Berhasil!*\n\n📂 *KANTONG: {wallet}*\n💰 *TIPE: {type}*\n📝 Kategori: {category}\n💬 Catatan: {note}\n💸 Nominal: *Rp{amount}*",
                 TEMPLATE_OVER_BUDGET: "⚠️ *WARNING BUDGET JEBOL!* ⚠️\n\nPengeluaran Anda pada kategori *{category}* telah melebihi batas anggaran bulanan!\n\n💸 Terpakai: *Rp{spent}*\n📊 Batas Anggaran: *Rp{limit}*",
                 TEMPLATE_WARN_BUDGET: "⚠️ *PERINGATAN HEMAT!* ⚠️\n\nPengeluaran kategori *{category}* sudah mencapai *{ratio}%* dari batas anggaran bulanan Anda.",
@@ -245,13 +251,13 @@
             }
         };
 
-        // --- KONFIGURASI REST API GOOGLE SHEETS ---
+        // --- KONFIGURASI REST API GOOGLE SHEETS (SINKRON TAUTAN TERBARU) ---
         const CONFIG = {
             API_URL: "https://script.google.com/macros/s/AKfycbzfLQt-M4gGzp2fNlrWNuDqZUs0igZWSv-jGuN_prZXqifOy9c23iClAddgVDYcRnASsg/exec",
             BOT_NUMBER: "628123456789"
         };
 
-        // --- PEMETAAN IKON KATEGORI TRANSAKSI (Fix ReferenceError) ---
+        // --- PEMETAAN IKON KATEGORI TRANSAKSI (Definisi Awal) ---
         const CATEGORY_ICONS = {
             'Gaji': { icon: 'briefcase', bg: 'bg-green-100', text: 'text-green-600' },
             'Freelance': { icon: 'award', bg: 'bg-emerald-100', text: 'text-emerald-600' },
@@ -264,7 +270,7 @@
             'Lainnya': { icon: 'more-horizontal', bg: 'bg-slate-100', text: 'text-slate-600' }
         };
 
-        // --- SISTEM NOTIFIKASI TOAST (Didefinisikan Di Awal Untuk Mencegah ReferenceError) ---
+        // --- SISTEM NOTIFIKASI TOAST (Definisi Awal) ---
         function showToast(message, type = "success") {
             const toast = document.getElementById('toast');
             const toastMsg = document.getElementById('toast-message');
@@ -328,7 +334,7 @@
             lucide.createIcons();
         }
 
-        // --- SISTEM PEMROSESAN PIN KEAMANAN ---
+        // --- PENGELOLAAN SISTEM PIN KEAMANAN ---
         function focusPinInput() {
             const input = document.getElementById('real-pin-input');
             if (input) {
@@ -336,6 +342,7 @@
             }
         }
 
+        // Penanganan input dari keyboard bawaan ponsel
         function handlePinInput(val) {
             val = val.replace(/[^0-9]/g, '');
             state.enteredPin = val;
@@ -376,7 +383,7 @@
                     throw new Error("Gagal");
                 }
             } catch (err) {
-                showToast("PIN terkirim ke WhatsApp Anda (123456)!", "success");
+                showToast("PIN keamanan terkirim ke WhatsApp Anda (123456)!", "success");
             }
         }
 
@@ -431,6 +438,19 @@
                 clearPin();
                 focusPinInput();
             }, 500);
+        }
+
+        // --- FUNGSI KELUAR SESI (LOGOUT) ---
+        function logout() {
+            sessionStorage.removeItem('authenticated_pin');
+            state.enteredPin = "";
+            const lockscreen = document.getElementById('pin-lockscreen');
+            if (lockscreen) {
+                lockscreen.classList.remove('hidden');
+            }
+            clearPin();
+            showToast("Sesi Keamanan Diakhiri", "success");
+            setTimeout(focusPinInput, 500);
         }
 
         // --- FETCH DENGAN TIMEOUT HELPER ---
@@ -503,8 +523,8 @@
                             <i data-lucide="info" class="w-5 h-5"></i>
                         </div>
                         <div>
-                            <h4 class="font-bold text-sm">Mode Demo Aktif (Offline)</h4>
-                            <p class="text-xs text-amber-700/90 font-semibold">Tautan API Sheets belum merespon atau CORS diblokir. Menggunakan data spreadsheet lokal bawaan.</p>
+                            <h4 class="font-bold text-sm">Mode Demo Aktif (Offline Mode)</h4>
+                            <p class="text-xs text-amber-700/90 font-semibold">Tautan API Sheets belum merespon atau CORS diblokir. Pastikan Web App dideploy sebagai 'Anyone'.</p>
                         </div>
                     </div>
                     <button onclick="fetchDashboardData()" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition-all self-start sm:self-auto shrink-0">
@@ -537,6 +557,10 @@
                         <div class="flex gap-2">
                             <button onclick="fetchDashboardData()" class="w-12 h-12 bg-white rounded-2xl border border-slate-100 flex items-center justify-center text-slate-500 hover:text-dana hover:bg-slate-50 card-shadow transition-all" title="Refresh Data">
                                 <i data-lucide="rotate-cw" class="w-5 h-5"></i>
+                            </button>
+                            <!-- Tombol Keluar Sesi Mobile -->
+                            <button onclick="logout()" class="lg:hidden w-12 h-12 bg-white rounded-2xl border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 card-shadow transition-all" title="Keluar Sesi">
+                                <i data-lucide="log-out" class="w-5 h-5"></i>
                             </button>
                             <button onclick="router('profile')" class="w-12 h-12 bg-white rounded-2xl border border-slate-100 flex items-center justify-center text-dana card-shadow transition-all">
                                 <i data-lucide="message-square" class="w-5 h-5"></i>
@@ -657,7 +681,7 @@
                                                 </div>
                                             </div>
                                         `;
-                                    }).join('') : '<p class="text-center py-8 text-slate-400 font-semibold text-sm">Belum ada transaksi di database.</p>'}
+                                    }).join('') : '<p class="text-center py-8 text-slate-400 font-semibold text-sm">Belum ada catatan transaksi di pangkalan data.</p>'}
                                 </div>
                             </div>
 
@@ -691,7 +715,7 @@
                                 <div class="flex justify-between items-center">
                                     <h3 class="font-bold text-slate-900">Batas Anggaran Kategori</h3>
                                     <button onclick="openModal('addBudget')" class="text-xs text-dana font-bold flex items-center gap-1 hover:underline">
-                                        <i data-lucide="plus" class="w-3.5 h-3.5"></i> Atur Budget
+                                        <i data-lucide="plus" class="w-3.5 h-3.5"></i> Tetapkan Anggaran
                                     </button>
                                 </div>
                                 <div class="space-y-4">
@@ -791,7 +815,7 @@
             </div>
         `;
 
-        // --- HALAMAN ANALISIS PERBELANJAAN (ANALYTICS VIEW) ---
+        // --- HALAMAN ANALISIS PENGELUARAN (ANALYTICS VIEW) ---
         const AnalyticsView = () => `
             <div class="max-w-6xl mx-auto p-4 lg:p-10 space-y-8 animate-fade">
                 <div>
@@ -809,9 +833,9 @@
                         <div class="space-y-4">
                             <div class="flex items-center gap-2 text-dana">
                                 <i data-lucide="sparkles" class="w-5 h-5"></i>
-                                <h3 class="text-lg font-extrabold">iMers AI Insights</h3>
+                                <h3 class="text-lg font-extrabold">iMers Wallet AI Insights</h3>
                             </div>
-                            <p class="text-xs text-slate-500 leading-relaxed font-semibold">Berdasarkan data aliran kas saat ini:</p>
+                            <p class="text-xs text-slate-500 leading-relaxed font-semibold">Berdasarkan data arus kas saat ini:</p>
                             <div class="p-4 bg-blue-50/50 rounded-2xl border border-blue-100 text-xs leading-relaxed">
                                 <p class="text-dana font-bold uppercase mb-1">Rekomendasi Bulanan</p>
                                 <p class="text-slate-600 font-semibold">Pengeluaran kategori belanja Anda mendominasi sisa anggaran. Menetapkan batas anggaran mingguan dapat menghemat cashflow hingga 15%.</p>
@@ -823,7 +847,7 @@
             </div>
         `;
 
-        // --- HALAMAN INTEGRASI & COPYWRITING (PROFILE VIEW) ---
+        // --- PANEL TETAPAN COPYWRITING DAN BOT WA (PROFILE VIEW) ---
         const ProfileView = () => `
             <div class="max-w-6xl mx-auto p-4 lg:p-10 space-y-8 animate-fade pb-10">
                 <div>
@@ -834,7 +858,13 @@
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <!-- Integrasi Token Fonnte & API -->
                     <div class="bg-white p-6 lg:p-8 rounded-[40px] border border-slate-100 card-shadow space-y-6 self-start animate-fade">
-                        <h3 class="text-lg font-bold text-slate-900">1. Konfigurasi Sistem</h3>
+                        <div class="flex justify-between items-center border-b border-slate-50 pb-2">
+                            <h3 class="text-lg font-bold text-slate-900">1. Konfigurasi Sistem</h3>
+                            <!-- Tombol Keluar di Halaman Pengaturan (Mobile & Desktop) -->
+                            <button onclick="logout()" class="px-3 py-1.5 bg-rose-50 text-rose-600 rounded-xl text-xs font-bold flex items-center gap-1.5 hover:bg-rose-100 transition-all">
+                                <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Keluar
+                            </button>
+                        </div>
                         <div class="space-y-4">
                             <div>
                                 <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">Google Apps Script Web App URL</label>
@@ -842,11 +872,11 @@
                             </div>
                             <div>
                                 <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">Fonnte API Token (Disimpan di Google Sheets)</label>
-                                <input type="text" id="cfg-fonnte-token" value="${state.data.settings.FONNTE_TOKEN || ''}" placeholder="Masukkan Token Fonnte Anda" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs outline-none focus:border-dana font-mono">
+                                <input type="text" id="cfg-fonnte-token" value="${state.data.settings.FONNTE_TOKEN || ''}" placeholder="Masukkan Token Fonnte Anda" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs outline-none focus:border-dana font-mono font-bold">
                             </div>
                             <div>
                                 <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">Nomor Bot WA (Contoh: 628123xxx)</label>
-                                <input type="text" id="cfg-bot-number" value="${state.data.settings.BOT_NUMBER || ''}" placeholder="62812345678" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs outline-none focus:border-dana font-mono">
+                                <input type="text" id="cfg-bot-number" value="${state.data.settings.BOT_NUMBER || ''}" placeholder="62812345678" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs outline-none focus:border-dana font-mono font-bold">
                             </div>
                             <div>
                                 <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">URL Logo Kustom Gambar (PNG/JPG)</label>
@@ -1102,7 +1132,7 @@
 
             const options = {
                 series: dataset.length > 0 ? dataset : [1],
-                labels: categories.length > 0 ? categories : ['Tiada Perbelanjaan'],
+                labels: categories.length > 0 ? categories : ['Belum Ada Pengeluaran'],
                 chart: { type: 'donut', height: 280, fontFamily: 'Plus Jakarta Sans' },
                 colors: ['#108EE9', '#FF8F3C', '#22C55E', '#A855F7', '#F43F5E'],
                 legend: { position: 'bottom', horizontalAlign: 'center', fontWeight: 600 },
@@ -1114,7 +1144,7 @@
                                 show: true,
                                 total: {
                                     show: true,
-                                    label: 'Perbelanjaan',
+                                    label: 'Pengeluaran',
                                     formatter: () => formatIDR(state.data.stats.expense).replace('Rp', '')
                                 }
                             }
