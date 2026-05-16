@@ -92,7 +92,7 @@
                 </button>
             </div>
 
-            <!-- Opsi Bantuan Jika Lupa PIN (Sembunyikan Angka Default Agar Rapi) -->
+            <!-- Opsi Bantuan Jika Lupa PIN -->
             <div class="text-center pt-2">
                 <button onclick="requestForgotPin()" class="text-xs text-dana hover:text-blue-300 font-bold tracking-wide transition-colors flex items-center gap-1.5 mx-auto">
                     <i data-lucide="key-round" class="w-3.5 h-3.5"></i> Lupa PIN? Kirim via WA & Email
@@ -298,6 +298,7 @@
             }
         }
 
+        // Penanganan input dari keyboard bawaan ponsel
         function handlePinInput(val) {
             val = val.replace(/[^0-9]/g, '');
             state.enteredPin = val;
@@ -472,7 +473,7 @@
                 .reduce((acc, t) => t.type === 'income' ? acc + t.amount : acc - t.amount, 0);
 
             const walletPerniagaan = state.data.transactions
-                .filter(t => t.wallet === 'Bisnis' || t.wallet === 'Bisnis')
+                .filter(t => t.wallet === 'Bisnis' || t.wallet === 'Perniagaan' || t.wallet === 'Bisnis')
                 .reduce((acc, t) => t.type === 'income' ? acc + t.amount : acc - t.amount, 0);
 
             const walletSimpanan = state.data.transactions
@@ -542,11 +543,11 @@
                             </div>
                             <div class="grid grid-cols-2 gap-4">
                                 <div class="bg-white/10 p-5 rounded-3xl backdrop-blur-md border border-white/10">
-                                    <p class="text-[10px] uppercase font-bold text-blue-100 mb-1.5 tracking-wider">Pemasukan Bulan Ini</p>
+                                    <p class="text-[10px] uppercase font-bold text-blue-100 mb-1.5 tracking-wider">Pendapatan Bulan Ini</p>
                                     <p class="text-lg lg:text-xl font-extrabold">${formatIDR(stats.income)}</p>
                                 </div>
                                 <div class="bg-white/10 p-5 rounded-3xl backdrop-blur-md border border-white/10">
-                                    <p class="text-[10px] uppercase font-bold text-blue-100 mb-1.5 tracking-wider">Pengeluaran Bulan Ini</p>
+                                    <p class="text-[10px] uppercase font-bold text-blue-100 mb-1.5 tracking-wider">Perbelanjaan Bulan Ini</p>
                                     <p class="text-lg lg:text-xl font-extrabold">${formatIDR(stats.expense)}</p>
                                 </div>
                             </div>
@@ -669,7 +670,7 @@
                             <!-- TAB: BUDGET -->
                             <div id="view-tab-budget" class="${state.subTab === 'budget' ? '' : 'hidden'} space-y-6 animate-fade">
                                 <div class="flex justify-between items-center">
-                                    <h3 class="font-bold text-slate-900">Anggaran Kategori Pengeluaran</h3>
+                                    <h3 class="font-bold text-slate-900">Anggaran Kategori Perbelanjaan</h3>
                                     <button onclick="openModal('addBudget')" class="text-xs text-dana font-bold flex items-center gap-1 hover:underline">
                                         <i data-lucide="plus" class="w-3.5 h-3.5"></i> Tetapkan Anggaran
                                     </button>
@@ -710,7 +711,7 @@
                 <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                     <div>
                         <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">PENCATATAN</p>
-                        <h2 class="text-2xl font-black text-slate-900">Riwayat Transaksi</h2>
+                        <h2 class="text-2xl font-black text-slate-900">Sejarah Transaksi</h2>
                     </div>
                     <div class="flex gap-2">
                         <button onclick="exportData('csv')" class="px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-2 hover:bg-slate-50 transition-all shadow-xs">
@@ -728,7 +729,7 @@
                         <select id="type-filter" onchange="filterHistory()" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-sm outline-none focus:border-dana transition-all">
                             <option value="all">Semua Tipe</option>
                             <option value="income">Hanya Pendapatan (+)</option>
-                            <option value="expense">Hanya Pengeluaran (-)</option>
+                            <option value="expense">Hanya Perbelanjaan (-)</option>
                         </select>
                     </div>
                 </div>
@@ -1234,7 +1235,7 @@
             state.data.stats = { balance: inc - exp, income: inc, expense: exp };
 
             closeModal();
-            showToast("Transaksi Berjaya Direkodkan!", "success");
+            showToast("Transaksi Berhasil Direkodkan!", "success");
             render();
         }
 
