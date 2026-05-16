@@ -3,301 +3,231 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iMersWallet - Your Financial Wallet Assistant</title>
+    <title>iMersWallet - Modern Fintech Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --dana-blue: #108EE9; --dana-dark: #0B5ED7; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #F5F9FF; }
+        :root { --dana-blue: #108EE9; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #F5F9FF; color: #1E293B; }
         .bg-dana { background-color: var(--dana-blue); }
         .text-dana { color: var(--dana-blue); }
-        .rounded-fintech { border-radius: 28px; }
-        .card-shadow { box-shadow: 0 10px 30px -5px rgba(16, 142, 233, 0.08); }
-        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); }
-        .shimmer { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: loading 1.5s infinite; }
-        @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-        .tab-active { color: var(--dana-blue); font-weight: 700; position: relative; }
-        .tab-active::after { content: ''; position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%); width: 20px; height: 4px; background: var(--dana-blue); border-radius: 10px; }
+        .card-shadow { box-shadow: 0 20px 25px -5px rgba(16, 142, 233, 0.05), 0 10px 10px -5px rgba(16, 142, 233, 0.02); }
+        .bottom-nav { box-shadow: 0 -5px 20px rgba(0,0,0,0.03); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade { animation: fadeIn 0.4s ease-out forwards; }
     </style>
 </head>
-<body class="pb-20 lg:pb-0">
+<body class="pb-24 lg:pb-0">
 
-    <div id="app" class="min-h-screen">
-        <!-- Content dynamically injected here -->
+    <div id="app">
+        <!-- Loader Screen -->
+        <div id="global-loader" class="fixed inset-0 bg-white z-[100] flex items-center justify-center">
+            <div class="flex flex-col items-center gap-4">
+                <div class="w-12 h-12 border-4 border-blue-100 border-t-dana rounded-full animate-spin"></div>
+                <p class="text-sm font-bold text-gray-400">Menghubungkan ke Database...</p>
+            </div>
+        </div>
     </div>
 
-    <!-- Mobile Bottom Navigation -->
-    <nav id="navbar" class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex justify-around items-center py-4 z-50 lg:hidden hidden">
-        <button onclick="navigate('home')" id="nav-home" class="flex flex-col items-center gap-1 text-dana transition-all">
+    <nav id="navbar" class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex justify-around items-center py-4 z-50 lg:hidden hidden bottom-nav">
+        <button onclick="router('home')" id="nav-home" class="flex flex-col items-center gap-1 text-dana transition-all">
             <i data-lucide="layout-grid" class="w-6 h-6"></i>
-            <span class="text-[10px] font-bold">Beranda</span>
+            <span class="text-[10px] font-bold">Home</span>
         </button>
-        <button onclick="navigate('history')" id="nav-history" class="flex flex-col items-center gap-1 text-gray-400 transition-all">
-            <i data-lucide="clipboard-list" class="w-6 h-6"></i>
+        <button onclick="router('history')" id="nav-history" class="flex flex-col items-center gap-1 text-gray-400">
+            <i data-lucide="history" class="w-6 h-6"></i>
             <span class="text-[10px] font-bold">Riwayat</span>
         </button>
         <div class="relative -top-8">
-            <button onclick="openTransactionModal()" class="w-14 h-14 bg-dana text-white rounded-full shadow-lg shadow-blue-200 border-4 border-white flex items-center justify-center hover:scale-110 transition-transform">
+            <button onclick="openModal()" class="w-14 h-14 bg-dana text-white rounded-full shadow-lg shadow-blue-200 border-4 border-white flex items-center justify-center hover:scale-110 transition-transform">
                 <i data-lucide="plus" class="w-8 h-8"></i>
             </button>
         </div>
-        <button onclick="navigate('analytics')" id="nav-analytics" class="flex flex-col items-center gap-1 text-gray-400 transition-all">
-            <i data-lucide="bar-chart-3" class="w-6 h-6"></i>
-            <span class="text-[10px] font-bold">Laporan</span>
+        <button onclick="router('analytics')" id="nav-analytics" class="flex flex-col items-center gap-1 text-gray-400">
+            <i data-lucide="trending-up" class="w-6 h-6"></i>
+            <span class="text-[10px] font-bold">Analisa</span>
         </button>
-        <button onclick="navigate('profile')" id="nav-profile" class="flex flex-col items-center gap-1 text-gray-400 transition-all">
-            <i data-lucide="user-circle" class="w-6 h-6"></i>
-            <span class="text-[10px] font-bold">Saya</span>
+        <button onclick="router('profile')" id="nav-profile" class="flex flex-col items-center gap-1 text-gray-400">
+            <i data-lucide="user" class="w-6 h-6"></i>
+            <span class="text-[10px] font-bold">Profil</span>
         </button>
     </nav>
 
-    <!-- Modal Base -->
-    <div id="modal-overlay" class="fixed inset-0 bg-black/40 z-[60] hidden backdrop-blur-sm transition-opacity items-center justify-center p-4">
-        <div id="modal-box" class="bg-white w-full max-w-md rounded-[32px] p-6 shadow-2xl scale-95 opacity-0 transition-all duration-300">
-            <!-- Modal content injected here -->
-        </div>
-    </div>
-
     <script>
-        // --- APP STATE & DUMMY DATA ---
-        const state = {
-            view: 'landing',
-            user: null,
-            transactions: [
-                { date: "2026-05-01", type: "income", category: "Gaji", amount: 5000000, note: "Gaji Bulanan" },
-                { date: "2026-05-02", type: "expense", category: "Makanan", amount: 85000, note: "Makan dan kopi" },
-                { date: "2026-05-03", type: "expense", category: "Transportasi", amount: 50000, note: "Bensin motor" },
-                { date: "2026-05-05", type: "expense", category: "Tagihan", amount: 350000, note: "Bayar internet" },
-                { date: "2026-05-07", type: "income", category: "Freelance", amount: 1200000, note: "Project desain" },
-                { date: "2026-05-09", type: "expense", category: "Belanja", amount: 275000, note: "Belanja bulanan" }
-            ]
+        const CONFIG = {
+            API_URL: "https://script.google.com/macros/s/AKfycbzfLQt-M4gGzp2fNlrWNuDqZUs0igZWSv-jGuN_prZXqifOy9c23iClAddgVDYcRnASsg/exec",
+            CURRENCY: "IDR"
         };
 
-        const formatCurrency = (val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val);
+        let state = {
+            view: 'landing',
+            data: {
+                stats: { balance: 0, income: 0, expense: 0 },
+                transactions: []
+            },
+            isLoading: false
+        };
 
-        // --- COMPONENTS ---
+        const formatIDR = (val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val);
+
+        async function fetchDashboardData() {
+            state.isLoading = true;
+            try {
+                const response = await fetch(`${CONFIG.API_URL}?action=getDashboard`);
+                const result = await response.json();
+                state.data = result;
+                render();
+            } catch (error) {
+                console.error("Fetch error:", error);
+                // Fallback to demo data if API fails
+            } finally {
+                state.isLoading = false;
+                document.getElementById('global-loader')?.classList.add('hidden');
+            }
+        }
+
         const LandingView = () => `
             <div class="bg-white min-h-screen">
-                <header class="p-6 flex justify-between items-center max-w-6xl mx-auto">
+                <nav class="p-6 flex justify-between items-center max-w-6xl mx-auto">
                     <div class="flex items-center gap-2">
                         <div class="w-10 h-10 bg-dana rounded-xl flex items-center justify-center text-white shadow-lg"><i data-lucide="wallet"></i></div>
-                        <span class="text-xl font-extrabold tracking-tight">iMers<span class="text-dana">Wallet</span></span>
+                        <span class="text-xl font-black">iMers<span class="text-dana">Wallet</span></span>
                     </div>
-                    <button onclick="navigate('login')" class="px-6 py-2 border-2 border-dana text-dana rounded-full font-bold hover:bg-dana hover:text-white transition-all">Masuk</button>
-                </header>
-                <main class="max-w-6xl mx-auto px-6 py-12 flex flex-col lg:flex-row items-center gap-12">
-                    <div class="flex-1 space-y-8 text-center lg:text-left">
-                        <div class="inline-block px-4 py-2 bg-blue-50 text-dana rounded-full text-xs font-bold uppercase tracking-widest">Digital Finance Assistant</div>
-                        <h1 class="text-5xl lg:text-7xl font-extrabold text-slate-900 leading-[1.1]">Atur Uang Lewat <span class="text-dana">WhatsApp</span></h1>
-                        <p class="text-gray-500 text-lg max-w-lg mx-auto lg:mx-0">Solusi cerdas mencatat keuangan pribadi cukup lewat chat. Dapatkan laporan visual instan ala aplikasi fintech modern.</p>
-                        <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                            <button onclick="navigate('login')" class="px-8 py-4 bg-dana text-white rounded-2xl font-bold shadow-xl hover:translate-y-[-2px] transition-all flex items-center justify-center gap-2">Coba Gratis Sekarang <i data-lucide="arrow-right"></i></button>
-                            <button class="px-8 py-4 bg-slate-100 text-slate-700 rounded-2xl font-bold flex items-center justify-center gap-2"><i data-lucide="play"></i> Lihat Video</button>
-                        </div>
+                    <button onclick="router('home')" class="px-6 py-2 bg-dana text-white rounded-full font-bold">Mulai Dashboard</button>
+                </nav>
+                <div class="px-6 py-20 text-center space-y-8 animate-fade">
+                    <h1 class="text-5xl lg:text-7xl font-black leading-tight text-slate-900">Catat Keuangan <br><span class="text-dana">Lewat WhatsApp.</span></h1>
+                    <p class="text-slate-400 max-w-lg mx-auto text-lg">Asisten finansial pribadi Anda yang terintegrasi dengan WhatsApp. Cepat, Mudah, dan Modern.</p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <button onclick="router('home')" class="px-8 py-4 bg-dana text-white rounded-2xl font-bold shadow-xl shadow-blue-200">Buka Dashboard Gratis</button>
+                        <a href="https://wa.me/YOUR_BOT_NUMBER" target="_blank" class="px-8 py-4 bg-white border border-slate-200 text-slate-700 rounded-2xl font-bold flex items-center justify-center gap-2">
+                            <i data-lucide="message-circle" class="text-green-500"></i> Coba di WhatsApp
+                        </a>
                     </div>
-                    <div class="flex-1 w-full flex justify-center">
-                        <div class="relative w-72 h-[580px] bg-slate-900 rounded-[3rem] border-[8px] border-slate-800 shadow-2xl overflow-hidden">
-                            <div class="absolute top-0 w-full h-6 flex justify-center"><div class="w-24 h-4 bg-slate-800 rounded-b-xl"></div></div>
-                            <div class="p-4 pt-10 space-y-4">
-                                <div class="bg-dana/10 p-3 rounded-2xl border border-white/20"><p class="text-[10px] text-dana font-bold">WHATSAPP</p><p class="text-xs text-slate-400">"makan siang 50rb"</p></div>
-                                <div class="bg-white p-3 rounded-2xl shadow-sm border border-slate-100"><p class="text-[10px] text-green-500 font-bold">IMERS BOT</p><p class="text-xs text-slate-800 font-medium">✅ Berhasil dicatat! Pengeluaran Makanan: Rp50.000</p></div>
-                                <div class="h-32 bg-dana rounded-2xl p-4 flex flex-col justify-between">
-                                    <div class="w-8 h-8 bg-white/20 rounded-lg"></div>
-                                    <div class="space-y-1"><p class="text-[10px] text-white/70">Saldo Anda</p><p class="text-lg font-bold text-white">Rp2.450.000</p></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </main>
+                </div>
             </div>
         `;
 
-        const DashboardView = () => {
-            const income = state.transactions.filter(t => t.type === 'income').reduce((a, b) => a + b.amount, 0);
-            const expense = state.transactions.filter(t => t.type === 'expense').reduce((a, b) => a + b.amount, 0);
-            const balance = income - expense;
-
-            return `
-                <div class="max-w-6xl mx-auto p-4 lg:p-10 space-y-8">
-                    <!-- Header -->
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <p class="text-sm text-gray-500 font-medium">Selamat Pagi,</p>
-                            <h2 class="text-2xl font-extrabold text-slate-900">User iMers 👋</h2>
-                        </div>
-                        <div class="flex gap-3">
-                            <button class="w-12 h-12 glass rounded-2xl flex items-center justify-center text-slate-600"><i data-lucide="bell"></i></button>
-                            <button onclick="navigate('profile')" class="w-12 h-12 bg-dana rounded-2xl flex items-center justify-center text-white shadow-lg"><i data-lucide="settings"></i></button>
-                        </div>
+        const DashboardView = () => `
+            <div class="max-w-6xl mx-auto p-4 lg:p-10 space-y-8 animate-fade">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Status Keuangan</p>
+                        <h2 class="text-2xl font-black">Ringkasan Anda 👋</h2>
                     </div>
-
-                    <!-- Main Balance Card -->
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div class="lg:col-span-2 bg-dana rounded-[40px] p-8 text-white relative overflow-hidden shadow-2xl shadow-blue-200">
-                            <div class="relative z-10 space-y-6">
-                                <div class="flex justify-between items-start">
-                                    <div><p class="text-blue-100 font-medium opacity-80">Total Saldo Aktif</p><h1 class="text-4xl lg:text-5xl font-black mt-1">${formatCurrency(balance)}</h1></div>
-                                    <button class="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-xl font-bold text-xs backdrop-blur-md">Dompet Utama <i data-lucide="chevron-down" class="inline w-3"></i></button>
-                                </div>
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div class="bg-white/10 p-4 rounded-3xl backdrop-blur-md border border-white/10">
-                                        <p class="text-[10px] uppercase font-black text-blue-100 mb-1">Pemasukan</p>
-                                        <p class="text-lg font-bold">${formatCurrency(income)}</p>
-                                    </div>
-                                    <div class="bg-white/10 p-4 rounded-3xl backdrop-blur-md border border-white/10">
-                                        <p class="text-[10px] uppercase font-black text-blue-100 mb-1">Pengeluaran</p>
-                                        <p class="text-lg font-bold">${formatCurrency(expense)}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-                            <div class="absolute -left-10 -top-10 w-48 h-48 bg-blue-400/20 rounded-full blur-2xl"></div>
-                        </div>
-
-                        <!-- Side Actions -->
-                        <div class="grid grid-cols-2 lg:grid-cols-1 gap-4">
-                            <div class="bg-white p-6 rounded-[32px] border border-slate-100 card-shadow flex flex-col justify-between">
-                                <p class="text-xs font-bold text-slate-400 uppercase tracking-tighter">Budget Makan</p>
-                                <div class="mt-2"><p class="text-lg font-black text-slate-900">Rp1.000.000</p><div class="w-full h-2 bg-slate-100 rounded-full mt-2 overflow-hidden"><div class="h-full bg-orange-400 w-[65%]"></div></div></div>
-                                <p class="text-[10px] text-orange-500 font-bold mt-2">Sisa: Rp350.000</p>
-                            </div>
-                            <div class="bg-white p-6 rounded-[32px] border border-slate-100 card-shadow flex flex-col justify-center items-center gap-2 group cursor-pointer">
-                                <div class="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center text-green-500 group-hover:bg-green-500 group-hover:text-white transition-all"><i data-lucide="download"></i></div>
-                                <p class="text-xs font-bold text-slate-900">Export PDF</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Charts & Recent -->
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <div class="bg-white p-6 lg:p-8 rounded-[40px] border border-slate-100 card-shadow">
-                            <div class="flex justify-between items-center mb-6">
-                                <h3 class="text-lg font-black text-slate-900">Analisa Arus Kas</h3>
-                                <select class="text-xs font-bold bg-slate-50 border-none rounded-lg p-2 outline-none"><option>Minggu Ini</option><option>Bulan Ini</option></select>
-                            </div>
-                            <div id="chart-main"></div>
-                        </div>
-
-                        <div class="bg-white p-6 lg:p-8 rounded-[40px] border border-slate-100 card-shadow">
-                            <div class="flex justify-between items-center mb-6">
-                                <h3 class="text-lg font-black text-slate-900">Transaksi Terbaru</h3>
-                                <button onclick="navigate('history')" class="text-xs font-bold text-dana">Lihat Semua</button>
-                            </div>
-                            <div class="space-y-4">
-                                ${state.transactions.slice(-5).reverse().map(t => `
-                                    <div class="flex items-center justify-between group cursor-pointer hover:bg-slate-50 p-2 rounded-2xl transition-all">
-                                        <div class="flex items-center gap-4">
-                                            <div class="w-12 h-12 ${t.type === 'income' ? 'bg-green-50 text-green-500' : 'bg-red-50 text-red-500'} rounded-2xl flex items-center justify-center shadow-sm"><i data-lucide="${t.type === 'income' ? 'arrow-down-left' : 'arrow-up-right'}" class="w-5 h-5"></i></div>
-                                            <div><p class="font-bold text-slate-900 text-sm">${t.category}</p><p class="text-[10px] text-slate-400 font-medium">${t.note}</p></div>
-                                        </div>
-                                        <p class="font-black text-sm ${t.type === 'income' ? 'text-green-500' : 'text-slate-900'}">${t.type === 'income' ? '+' : '-'}${formatCurrency(t.amount).replace('Rp', '')}</p>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
+                    <div class="w-12 h-12 bg-white rounded-2xl border border-slate-100 flex items-center justify-center text-dana card-shadow">
+                        <i data-lucide="bell" class="w-5 h-5"></i>
                     </div>
                 </div>
-            `;
-        };
 
-        // --- NAVIGATION & ROUTING ---
-        function navigate(view) {
+                <!-- Balance Card -->
+                <div class="bg-dana rounded-[40px] p-8 text-white relative overflow-hidden card-shadow">
+                    <div class="relative z-10 space-y-8">
+                        <div>
+                            <p class="text-blue-100 font-medium opacity-80">Total Saldo Aktif</p>
+                            <h1 class="text-4xl lg:text-5xl font-black mt-2">${formatIDR(state.data.stats.balance)}</h1>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-white/10 p-4 rounded-3xl backdrop-blur-md border border-white/10">
+                                <p class="text-[10px] uppercase font-black text-blue-100 mb-1">Pemasukan</p>
+                                <p class="text-lg font-bold">${formatIDR(state.data.stats.income)}</p>
+                            </div>
+                            <div class="bg-white/10 p-4 rounded-3xl backdrop-blur-md border border-white/10">
+                                <p class="text-[10px] uppercase font-black text-blue-100 mb-1">Pengeluaran</p>
+                                <p class="text-lg font-bold">${formatIDR(state.data.stats.expense)}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="absolute -right-20 -top-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Recent Transactions -->
+                    <div class="bg-white p-8 rounded-[40px] border border-slate-50 card-shadow">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-black">Riwayat Terakhir</h3>
+                            <button class="text-xs font-bold text-dana">Lihat Semua</button>
+                        </div>
+                        <div class="space-y-5">
+                            ${state.data.transactions.length > 0 ? state.data.transactions.map(t => `
+                                <div class="flex items-center justify-between group">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-12 h-12 ${t.type === 'income' ? 'bg-green-50 text-green-500' : 'bg-red-50 text-red-500'} rounded-2xl flex items-center justify-center">
+                                            <i data-lucide="${t.type === 'income' ? 'arrow-down-left' : 'arrow-up-right'}" class="w-5 h-5"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-bold text-slate-900">${t.category}</p>
+                                            <p class="text-[10px] text-slate-400 font-bold uppercase">${t.note}</p>
+                                        </div>
+                                    </div>
+                                    <p class="font-black ${t.type === 'income' ? 'text-green-500' : 'text-slate-900'}">
+                                        ${t.type === 'income' ? '+' : '-'}${formatIDR(t.amount).replace('Rp', '')}
+                                    </p>
+                                </div>
+                            `).join('') : '<p class="text-center py-10 text-slate-400 font-medium">Belum ada transaksi</p>'}
+                        </div>
+                    </div>
+
+                    <!-- Simple Chart -->
+                    <div class="bg-white p-8 rounded-[40px] border border-slate-50 card-shadow">
+                        <h3 class="text-lg font-black mb-6">Analisa Mingguan</h3>
+                        <div id="main-chart" class="min-h-[250px]"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        function router(view) {
             state.view = view;
+            if (view === 'home') {
+                fetchDashboardData();
+            }
+            render();
+        }
+
+        function render() {
             const container = document.getElementById('app');
             const nav = document.getElementById('navbar');
             
-            // Handle views
-            if (view === 'landing') {
+            if (state.view === 'landing') {
                 container.innerHTML = LandingView();
                 nav.classList.add('hidden');
-            } else if (view === 'login') {
-                container.innerHTML = `<div class="min-h-screen flex items-center justify-center p-6"><div class="w-full max-w-md bg-white p-8 rounded-[40px] card-shadow text-center space-y-6"><h2 class="text-2xl font-black">Masuk iMers</h2><p class="text-slate-400">Gunakan nomor WhatsApp Anda untuk masuk</p><input type="text" placeholder="0812xxxx" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:border-dana transition-all"><button onclick="navigate('home')" class="w-full py-4 bg-dana text-white rounded-2xl font-bold shadow-xl">Masuk Sekarang</button></div></div>`;
-                nav.classList.add('hidden');
-            } else if (view === 'home') {
+            } else if (state.view === 'home') {
                 container.innerHTML = DashboardView();
                 nav.classList.remove('hidden');
-                updateActiveNav('nav-home');
-                initCharts();
-            } else {
-                container.innerHTML = `<div class="flex items-center justify-center min-h-screen font-bold text-slate-300">MODUL ${view.toUpperCase()} SEDANG DISIAPKAN</div>`;
-                nav.classList.remove('hidden');
-                updateActiveNav('nav-' + view);
+                setTimeout(initChart, 100);
             }
             
             lucide.createIcons();
-            window.scrollTo(0, 0);
         }
 
-        function updateActiveNav(id) {
-            ['nav-home', 'nav-history', 'nav-analytics', 'nav-profile'].forEach(el => {
-                const btn = document.getElementById(el);
-                if (btn) {
-                    btn.classList.remove('text-dana', 'tab-active');
-                    btn.classList.add('text-gray-400');
-                }
-            });
-            const active = document.getElementById(id);
-            if (active) {
-                active.classList.add('text-dana', 'tab-active');
-                active.classList.remove('text-gray-400');
-            }
-        }
-
-        // --- CHARTS ---
-        function initCharts() {
+        function initChart() {
+            const chartEl = document.querySelector("#main-chart");
+            if (!chartEl) return;
+            
             const options = {
-                series: [{ name: 'Income', data: [3100, 4000, 2800, 5100, 4200, 8000, 7000] }, { name: 'Expense', data: [1100, 3200, 4500, 3200, 3400, 5200, 4100] }],
-                chart: { height: 300, type: 'area', toolbar: { show: false }, fontFamily: 'Plus Jakarta Sans', zoom: { enabled: false } },
-                colors: ['#108EE9', '#FB923C'],
-                stroke: { curve: 'smooth', width: 4 },
-                fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.45, opacityTo: 0.05, stops: [20, 100] } },
+                series: [{ name: 'Cashflow', data: [31, 40, 28, 51, 42, 109, 100] }],
+                chart: { height: 250, type: 'area', toolbar: { show: false }, fontFamily: 'Plus Jakarta Sans' },
+                colors: ['#108EE9'],
+                fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.3, opacityTo: 0 } },
                 dataLabels: { enabled: false },
-                grid: { borderColor: '#f1f1f1', strokeDashArray: 4 },
-                xaxis: { categories: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'], axisBorder: { show: false }, axisTicks: { show: false } },
-                yaxis: { labels: { show: false } },
-                legend: { position: 'top', horizontalAlign: 'right', fontWeight: 700 }
+                stroke: { curve: 'smooth', width: 4 },
+                xaxis: { categories: ["S", "S", "R", "K", "J", "S", "M"], axisBorder: { show: false } },
+                yaxis: { show: false },
+                grid: { show: false }
             };
-            new ApexCharts(document.querySelector("#chart-main"), options).render();
+            new ApexCharts(chartEl, options).render();
         }
 
-        // --- MODAL LOGIC ---
-        function openTransactionModal() {
-            const overlay = document.getElementById('modal-overlay');
-            const box = document.getElementById('modal-box');
-            overlay.classList.remove('hidden');
-            overlay.classList.add('flex');
-            
-            box.innerHTML = `
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-black text-slate-900">Tambah Transaksi</h3>
-                    <button onclick="closeModal()" class="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400"><i data-lucide="x"></i></button>
-                </div>
-                <div class="space-y-4">
-                    <div class="flex p-1 bg-slate-100 rounded-2xl">
-                        <button class="flex-1 py-3 rounded-xl font-bold bg-white text-dana shadow-sm">Pengeluaran</button>
-                        <button class="flex-1 py-3 rounded-xl font-bold text-slate-400">Pemasukan</button>
-                    </div>
-                    <div><label class="text-[10px] font-black text-slate-400 uppercase mb-2 block">Nominal (IDR)</label><input type="number" placeholder="0" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:border-dana text-2xl font-black"></div>
-                    <div><label class="text-[10px] font-black text-slate-400 uppercase mb-2 block">Kategori</label><select class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none"><option>Makanan</option><option>Transportasi</option><option>Tagihan</option><option>Hiburan</option></select></div>
-                    <button onclick="closeModal()" class="w-full py-4 bg-dana text-white rounded-2xl font-black shadow-xl shadow-blue-100 mt-4">Simpan Transaksi</button>
-                </div>
-            `;
-            
-            setTimeout(() => { box.classList.remove('scale-95', 'opacity-0'); box.classList.add('scale-100', 'opacity-100'); }, 10);
-            lucide.createIcons();
-        }
-
-        function closeModal() {
-            const overlay = document.getElementById('modal-overlay');
-            const box = document.getElementById('modal-box');
-            box.classList.add('scale-95', 'opacity-0');
-            setTimeout(() => { overlay.classList.add('hidden'); overlay.classList.remove('flex'); }, 200);
-        }
-
-        // --- INIT ---
-        window.onload = () => navigate('landing');
+        window.onload = () => {
+            render();
+            // Start loading data if already at home
+            if (state.view === 'landing') {
+                document.getElementById('global-loader')?.classList.add('hidden');
+            }
+        };
     </script>
 </body>
 </html>
