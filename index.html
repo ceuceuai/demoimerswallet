@@ -251,6 +251,19 @@
             BOT_NUMBER: "628123456789"
         };
 
+        // --- PEMETAAN IKON KATEGORI TRANSAKSI (Fix ReferenceError) ---
+        const CATEGORY_ICONS = {
+            'Gaji': { icon: 'briefcase', bg: 'bg-green-100', text: 'text-green-600' },
+            'Freelance': { icon: 'award', bg: 'bg-emerald-100', text: 'text-emerald-600' },
+            'Makanan': { icon: 'coffee', bg: 'bg-amber-100', text: 'text-amber-600' },
+            'Transportasi': { icon: 'car', bg: 'bg-blue-100', text: 'text-blue-600' },
+            'Tagihan': { icon: 'lightning', bg: 'bg-purple-100', text: 'text-purple-600' },
+            'Belanja': { icon: 'shopping-bag', bg: 'bg-rose-100', text: 'text-rose-600' },
+            'Pendidikan': { icon: 'book-open', bg: 'bg-indigo-100', text: 'text-indigo-600' },
+            'Kesehatan': { icon: 'heart', bg: 'bg-red-100', text: 'text-red-600' },
+            'Lainnya': { icon: 'more-horizontal', bg: 'bg-slate-100', text: 'text-slate-600' }
+        };
+
         // --- SISTEM NOTIFIKASI TOAST (Didefinisikan Di Awal Untuk Mencegah ReferenceError) ---
         function showToast(message, type = "success") {
             const toast = document.getElementById('toast');
