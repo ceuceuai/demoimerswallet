@@ -304,6 +304,7 @@
         const formatIDR = (val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val);
 
         // --- RENDER LOGO DINAMIS (Logo Kustom / Ikon Dompet Default) ---
+        // MEMBUAT LOGO TRANSPARAN BEBAS DARI BACKGROUND PUTIH KOTAK
         function renderLogo(sizeClass = "w-10 h-10", iconSize = "w-5 h-5") {
             const logoUrl = state.data.settings.APP_LOGO || "";
             if (logoUrl && logoUrl.trim() !== "" && logoUrl.startsWith("http")) {
@@ -372,7 +373,6 @@
             }
         }
 
-        // Modifikasi Visual Titik Indikator PIN
         function updatePinIndicators() {
             const dots = document.querySelectorAll('#pin-dots div');
             dots.forEach((dot, index) => {
@@ -460,7 +460,7 @@
         }
 
         // --- FETCH DENGAN TIMEOUT HELPER ---
-        // Meningkatkan batas waktu (timeout) default ke 15 detik agar pangkalan data cloud Apps Script yang lambat tidak terputus di tengah jalan
+        // MENINGKATKAN TIMEOUT KE 15 DETIK AGAR COLD START SPREADSHEET GOOGLE TIDAK MEMBUAT SINKRONISASI MATI
         async function fetchWithTimeout(resource, options = {}) {
             const { timeout = 15000 } = options;
             const controller = new AbortController();
@@ -848,7 +848,7 @@
                             <p class="text-xs text-slate-500 leading-relaxed font-semibold">Berdasarkan data arus kas saat ini:</p>
                             <div class="p-4 bg-blue-50/50 rounded-2xl border border-blue-100 text-xs leading-relaxed">
                                 <p class="text-dana font-bold uppercase mb-1">Rekomendasi Bulanan</p>
-                                <p class="text-slate-600 font-semibold">Pengeluaran kategori belanja Anda mendominasi sisa anggaran. Menetapkan batas anggaran mingguan dapat menghemat cashflow hingga 15%.</p>
+                                <p class="text-slate-600 font-semibold">Pengeluaran kategori belanja Anda mendominasi sisa anggaran. Menetapkan batas anggaran mingguannya dapat menghemat cashflow hingga 15%.</p>
                             </div>
                         </div>
                         <p class="text-[10px] text-slate-400 font-bold">Generasi rekomendasi real-time</p>
@@ -991,6 +991,7 @@
         }
 
         // --- SIMPAN KONFIGURASI DAN TEMPLAT KEMBALI KE SPREADSHEET ---
+        // MENAMBAH VALIDASI CEK KEUTUHAN JALUR URL GAS AGAR TIDAK SALAH COPAST SECARA TRUNCATED
         async function saveAllSettings() {
             const apiVal = document.getElementById('cfg-api-url').value.trim();
             const tokenVal = document.getElementById('cfg-fonnte-token').value.trim();
@@ -1004,7 +1005,12 @@
             const tmplWarnBudget = document.getElementById('tmpl-warn-budget').value;
             const tmplWeekly = document.getElementById('tmpl-weekly').value;
 
-            if (apiVal) CONFIG.API_URL = apiVal;
+            if (apiVal) {
+                if (!apiVal.startsWith("https://script.google.com/") || !apiVal.includes("/exec")) {
+                    return showToast("URL Apps Script tidak valid! Pastikan diakhiri dengan /exec", "warn");
+                }
+                CONFIG.API_URL = apiVal;
+            }
 
             const queryParams = new URLSearchParams({
                 action: 'saveSettings',
