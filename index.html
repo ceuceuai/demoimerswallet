@@ -372,6 +372,7 @@
             }
         }
 
+        // Modifikasi Visual Titik Indikator PIN
         function updatePinIndicators() {
             const dots = document.querySelectorAll('#pin-dots div');
             dots.forEach((dot, index) => {
@@ -386,7 +387,7 @@
         async function requestForgotPin() {
             showToast("Mengirimkan PIN aktif ke WA & Email...", "success");
             try {
-                const response = await fetchWithTimeout(`${CONFIG.API_URL}?action=forgotPin`, { timeout: 5000 });
+                const response = await fetchWithTimeout(`${CONFIG.API_URL}?action=forgotPin`, { timeout: 15000 });
                 const result = await response.json();
                 if (result && result.status === 'success') {
                     showToast("PIN berhasil terkirim!", "success");
@@ -459,8 +460,9 @@
         }
 
         // --- FETCH DENGAN TIMEOUT HELPER ---
+        // Meningkatkan batas waktu (timeout) default ke 15 detik agar pangkalan data cloud Apps Script yang lambat tidak terputus di tengah jalan
         async function fetchWithTimeout(resource, options = {}) {
-            const { timeout = 4000 } = options;
+            const { timeout = 15000 } = options;
             const controller = new AbortController();
             const id = setTimeout(() => controller.abort(), timeout);
             try {
@@ -480,7 +482,7 @@
         async function fetchDashboardData() {
             state.isLoading = true;
             try {
-                const response = await fetchWithTimeout(`${CONFIG.API_URL}?action=getDashboard`, { timeout: 4000 });
+                const response = await fetchWithTimeout(`${CONFIG.API_URL}?action=getDashboard`, { timeout: 15000 });
                 if (!response.ok) throw new Error("Koneksi gagal.");
                 const result = await response.json();
                 
@@ -495,7 +497,6 @@
             } catch (error) {
                 console.warn("Database cloud tidak merespon. Menggunakan data lokal.");
                 state.isUsingDemo = true;
-                // Pop-up pemberitahuan demo / offline telah dihapus permanen agar tidak mengganggu pengguna
             } finally {
                 state.isLoading = false;
                 document.getElementById('global-loader')?.classList.add('hidden');
@@ -804,7 +805,7 @@
                                     return `
                                         <tr class="hover:bg-slate-50/50 transition-colors animate-fade" data-type="${t.type}" data-note="${t.note.toLowerCase()}">
                                             <td class="p-6 font-medium text-slate-500">${t.date}</td>
-                                            <td class="p-6 font-bold text-slate-800">${t.category}</td>
+                                            <td class="p-6 font-bold text-slate-850">${t.category}</td>
                                             <td class="p-6 text-slate-500 font-medium">${t.note}</td>
                                             <td class="p-6 text-right font-extrabold ${t.type === 'income' ? 'text-green-500' : 'text-slate-950'}">
                                                 ${t.type === 'income' ? '+' : '-'}${formatIDR(t.amount)}
@@ -1021,7 +1022,7 @@
             showToast("Menyimpan Pengaturan Ke Google Sheet...", "success");
 
             try {
-                const response = await fetchWithTimeout(`${CONFIG.API_URL}?${queryParams.toString()}`, { timeout: 5000 });
+                const response = await fetchWithTimeout(`${CONFIG.API_URL}?${queryParams.toString()}`, { timeout: 15000 });
                 const result = await response.json();
                 if (result && result.status === 'success') {
                     showToast("Semua Konfigurasi Berhasil Disimpan!", "success");
@@ -1039,7 +1040,7 @@
         async function triggerWeeklyReportManual() {
             showToast("Mengirim Laporan Mingguan...", "success");
             try {
-                const response = await fetchWithTimeout(`${CONFIG.API_URL}?action=triggerWeeklyReport`, { timeout: 5000 });
+                const response = await fetchWithTimeout(`${CONFIG.API_URL}?action=triggerWeeklyReport`, { timeout: 15000 });
                 const result = await response.json();
                 if (result && result.status === 'success') {
                     showToast("Laporan Berhasil Dikirim ke WA & Email!", "success");
