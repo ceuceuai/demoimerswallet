@@ -52,6 +52,30 @@
             75% { transform: translateX(10px); }
         }
         .animate-shake { animation: shake 0.2s ease-in-out 2; }
+
+        /* Logo transparan: hilangkan background/card putih bawaan saat image dimuat dari URL */
+        .logo-transparent-wrap {
+            background: transparent !important;
+            box-shadow: none !important;
+            border: 0 !important;
+            overflow: visible !important;
+        }
+        .logo-transparent-img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: transparent !important;
+            border: 0 !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+        }
+        #lockscreen-logo-container,
+        #lockscreen-logo-container img {
+            background: transparent !important;
+            box-shadow: none !important;
+            border: 0 !important;
+        }
     </style>
 </head>
 <body class="pb-24 lg:pb-0 min-h-screen flex flex-col lg:flex-row font-sans">
@@ -298,7 +322,8 @@
             isUsingDemo: true,
             subTab: 'daily', // Sub-tabs: daily, calendar, yearly, budget
             isLoading: false,
-            enteredPin: ""
+            enteredPin: "",
+            preloadedDashboard: null
         };
 
         const formatIDR = (val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val);
@@ -307,13 +332,21 @@
         // MEMBUAT LOGO TRANSPARAN BEBAS DARI BACKGROUND PUTIH KOTAK
         function renderLogo(sizeClass = "w-10 h-10", iconSize = "w-5 h-5") {
             const logoUrl = state.data.settings.APP_LOGO || "";
+            const isLockscreenLogo = sizeClass.includes("w-24") || sizeClass.includes("h-24") || sizeClass.includes("w-20") || sizeClass.includes("h-20");
+
             if (logoUrl && logoUrl.trim() !== "" && logoUrl.startsWith("http")) {
                 return `
-                    <div class="relative ${sizeClass} mx-auto flex items-center justify-center">
-                        <img src="${logoUrl}" class="max-w-full max-h-full object-contain" alt="Logo" onerror="handleLogoError(this, '${sizeClass}', '${iconSize}')">
+                    <div class="relative ${sizeClass} mx-auto flex items-center justify-center logo-transparent-wrap">
+                        <img 
+                            src="${logoUrl}" 
+                            class="logo-transparent-img ${isLockscreenLogo ? 'scale-[1.35]' : 'scale-[1.08]'}" 
+                            alt="Logo iMersWallet" 
+                            onerror="handleLogoError(this, '${sizeClass}', '${iconSize}')"
+                        >
                     </div>
                 `;
             }
+
             return `<div class="${sizeClass} mx-auto bg-dana rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-200"><i data-lucide="wallet" class="${iconSize}"></i></div>`;
         }
 
@@ -330,7 +363,7 @@
             if (sidebarContainer) sidebarContainer.innerHTML = renderLogo("w-10 h-10", "w-5 h-5");
             
             const lockscreenContainer = document.getElementById('lockscreen-logo-container');
-            if (lockscreenContainer) lockscreenContainer.innerHTML = renderLogo("w-16 h-16", "w-8 h-8");
+            if (lockscreenContainer) lockscreenContainer.innerHTML = renderLogo("w-24 h-24", "w-10 h-10");
             
             lucide.createIcons();
         }
@@ -478,18 +511,80 @@
             }
         }
 
+
+        // --- PRELOAD BRANDING SEBELUM PIN ---
+        // Logo dari Google Sheets langsung tampil di lockscreen tanpa harus input PIN dulu.
+        function applyBrandingSettings(settings = {}) {
+            if (!settings) return;
+
+            if (settings.APP_LOGO && String(settings.APP_LOGO).trim() !== "") {
+                state.data.settings.APP_LOGO = String(settings.APP_LOGO).trim();
+                try {
+                    localStorage.setItem('imerswallet_app_logo', state.data.settings.APP_LOGO);
+                } catch (e) {}
+            }
+
+            if (settings.BOT_NUMBER && String(settings.BOT_NUMBER).trim() !== "") {
+                CONFIG.BOT_NUMBER = String(settings.BOT_NUMBER).trim();
+                try {
+                    localStorage.setItem('imerswallet_bot_number', CONFIG.BOT_NUMBER);
+                } catch (e) {}
+
+                const desktopWaBtn = document.getElementById('desktop-wa-btn');
+                if (desktopWaBtn) desktopWaBtn.href = `https://wa.me/${CONFIG.BOT_NUMBER}`;
+            }
+
+            updateLogosInUI();
+        }
+
+        function hydrateCachedBranding() {
+            try {
+                const cachedLogo = localStorage.getItem('imerswallet_app_logo');
+                const cachedBotNumber = localStorage.getItem('imerswallet_bot_number');
+
+                if (cachedLogo) state.data.settings.APP_LOGO = cachedLogo;
+                if (cachedBotNumber) CONFIG.BOT_NUMBER = cachedBotNumber;
+            } catch (e) {}
+
+            updateLogosInUI();
+        }
+
+        async function preloadBrandingBeforePin() {
+            hydrateCachedBranding();
+
+            try {
+                const response = await fetchWithTimeout(`${CONFIG.API_URL}?action=getDashboard&branding=1`, { timeout: 12000 });
+                if (!response.ok) throw new Error("Branding fetch gagal.");
+
+                const result = await response.json();
+                if (result && result.status === 'success') {
+                    state.preloadedDashboard = result;
+                    applyBrandingSettings(result.settings || {});
+                }
+            } catch (err) {
+                console.warn("Branding lockscreen belum bisa dimuat dari cloud, memakai cache/default.", err);
+            }
+        }
+
         // --- AMBIL DATA REAL-TIME DARI GOOGLE APPS SCRIPT ---
         async function fetchDashboardData() {
             state.isLoading = true;
             try {
-                const response = await fetchWithTimeout(`${CONFIG.API_URL}?action=getDashboard`, { timeout: 15000 });
-                if (!response.ok) throw new Error("Koneksi gagal.");
-                const result = await response.json();
+                let result = state.preloadedDashboard;
+
+                if (!result) {
+                    const response = await fetchWithTimeout(`${CONFIG.API_URL}?action=getDashboard`, { timeout: 15000 });
+                    if (!response.ok) throw new Error("Koneksi gagal.");
+                    result = await response.json();
+                } else {
+                    state.preloadedDashboard = null;
+                }
                 
                 if (result && result.status === 'success') {
                     state.data = result;
                     state.isUsingDemo = false;
                     CONFIG.BOT_NUMBER = result.settings.BOT_NUMBER || CONFIG.BOT_NUMBER;
+                    applyBrandingSettings(result.settings || {});
                     showToast("Pangkalan Data Sinkron Real-time!", "success");
                 } else {
                     throw new Error("Format tidak sesuai.");
@@ -1325,19 +1420,26 @@
         }
 
         // --- PENYEDIAAN UTAMA SEWAKTU SKRIN DIMUAT ---
-        window.onload = () => {
+        window.onload = async () => {
             const desktopWaBtn = document.getElementById('desktop-wa-btn');
             if (desktopWaBtn) desktopWaBtn.href = `https://wa.me/${CONFIG.BOT_NUMBER}`;
-            
+
+            // Muat logo dari cache/localStorage secepat mungkin supaya lockscreen tidak tampil logo dummy.
+            hydrateCachedBranding();
+
+            // Refresh logo dari Google Sheets bahkan sebelum PIN dimasukkan.
+            const brandingPromise = preloadBrandingBeforePin();
+
             // Periksa sekiranya PIN keselamatan telah disahkan sebelum ini
             if (sessionStorage.getItem('authenticated_pin') === 'true') {
                 document.getElementById('pin-lockscreen').classList.add('hidden');
+                await brandingPromise;
                 fetchDashboardData();
             } else {
                 document.getElementById('global-loader').classList.add('hidden');
-                updateLogosInUI();
-                // Fokus pada input secara automatik
-                setTimeout(focusPinInput, 500);
+                await brandingPromise;
+                // Fokus pada input secara automatik setelah logo cloud selesai dicoba.
+                setTimeout(focusPinInput, 300);
             }
         };
     </script>
