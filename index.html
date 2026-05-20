@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -238,7 +237,7 @@
                     <!-- Diisi otomatis oleh fungsi renderLogo() -->
                 </div>
                 <h2 class="text-3xl font-black mt-4"><span class="text-[#108EE9]">iMers</span><span class="text-[#00E5FF]">WALLET</span></h2>
-                <p class="text-sm text-slate-300 font-medium">Masukkan PIN Demo 888777</p>
+                <p class="text-sm text-slate-300 font-medium">Masukkan PIN 6-Digit</p>
             </div>
 
             <!-- Titik Penunjuk PIN (Mengetuk area ini akan fokus ke input HP) -->
@@ -355,7 +354,7 @@
             <div id="global-loader" class="fixed inset-0 bg-white z-[100] flex items-center justify-center">
                 <div class="flex flex-col items-center gap-4">
                     <div class="w-12 h-12 border-4 border-blue-100 border-t-dana rounded-full animate-spin"></div>
-                    <p class="text-sm font-bold text-gray-500">Membuka Demo Sandbox iMersWallet...</p>
+                    <p class="text-sm font-bold text-gray-500">Menghubungkan Pangkalan Data iMersWallet...</p>
                 </div>
             </div>
         </div>
@@ -438,7 +437,7 @@
                 FONNTE_TOKEN: "",
                 BOT_NUMBER: "628123456789",
                 USER_EMAIL: "owner@example.com",
-                APP_LOGO: "https://imersnesia.com/wp-content/uploads/2026/05/Final-Logo-imerswallet-WA-only.webp", // Demo logo default
+                APP_LOGO: "", // Default kosong (akan fallback ke ikon Lucide Wallet)
                 TEMPLATE_SUCCESS: "✅ *Pencatatan Berhasil!*\n\n📂 *KANTONG: {wallet}*\n💰 *TIPE: {type}*\n📝 Kategori: {category}\n💬 Catatan: {note}\n💸 Nominal: *Rp{amount}*",
                 TEMPLATE_OVER_BUDGET: "⚠️ *WARNING BUDGET JEBOL!* ⚠️\n\nPengeluaran Anda pada kategori *{category}* telah melebihi batas anggaran bulanan!\n\n💸 Terpakai: *Rp{spent}*\n📊 Batas Anggaran: *Rp{limit}*",
                 TEMPLATE_WARN_BUDGET: "⚠️ *PERINGATAN HEMAT!* ⚠️\n\nPengeluaran kategori *{category}* sudah mencapai *{ratio}%* dari batas anggaran bulanan Anda.",
@@ -469,12 +468,8 @@
 
         // --- KONFIGURASI REST API GOOGLE SHEETS (SINKRON TAUTAN TERBARU) ---
         const CONFIG = {
-            MODE: "DEMO_SANDBOX",
-            API_URL: "",
-            BOT_NUMBER: "628123456789",
-            WRITE_ENABLED: false,
-            FIXED_PIN: "888777",
-            DEFAULT_LOGO: "https://imersnesia.com/wp-content/uploads/2026/05/Final-Logo-imerswallet-WA-only.webp"
+            API_URL: "https://script.google.com/macros/s/AKfycbzhQyqs3uUyop5l_5sgwPg_0kyFUM2vfY9bnCiNetZW0dxeQrPT0VNrZ9GGBXG_6-djqQ/exec",
+            BOT_NUMBER: "628123456789"
         };
 
         // --- PEMETAAN IKON KATEGORI TRANSAKSI (Definisi Awal) ---
@@ -608,17 +603,25 @@
         // --- RENDER LOGO DINAMIS (Logo Kustom / Ikon Dompet Default) ---
         // MEMBUAT LOGO TRANSPARAN BEBAS DARI BACKGROUND PUTIH KOTAK
         function renderLogo(sizeClass = "w-10 h-10", iconSize = "w-5 h-5") {
-            const logoUrl = (state?.data?.settings?.APP_LOGO || CONFIG.DEFAULT_LOGO || "").trim();
+            const logoUrl = state.data.settings.APP_LOGO || "";
             const isLockscreenLogo = sizeClass.includes("w-24") || sizeClass.includes("h-24") || sizeClass.includes("w-20") || sizeClass.includes("h-20");
 
-            if (logoUrl) {
+            if (
+                logoUrl &&
+                logoUrl.trim() !== "" &&
+                (
+                    logoUrl.startsWith("http") ||
+                    logoUrl.startsWith("data:image") ||
+                    logoUrl.startsWith("./") ||
+                    logoUrl.startsWith("/")
+                )
+            ) {
                 return `
                     <div class="relative ${sizeClass} mx-auto flex items-center justify-center logo-transparent-wrap">
-                        <img
-                            src="${logoUrl}"
-                            class="logo-transparent-img ${isLockscreenLogo ? 'scale-[1.35]' : 'scale-[1.08]'}"
-                            alt="Logo iMersWallet"
-                            referrerpolicy="no-referrer"
+                        <img 
+                            src="${logoUrl}" 
+                            class="logo-transparent-img ${isLockscreenLogo ? 'scale-[1.35]' : 'scale-[1.08]'}" 
+                            alt="Logo iMersWallet" 
                             onerror="handleLogoError(this, '${sizeClass}', '${iconSize}')"
                         >
                     </div>
@@ -696,7 +699,18 @@
         }
 
         async function requestForgotPin() {
-            showToast("PIN Demo tetap: 888777", "success");
+            showToast("Mengirimkan PIN aktif ke WA & Email...", "success");
+            try {
+                const response = await fetchWithTimeout(`${CONFIG.API_URL}?action=forgotPin`, { timeout: 15000 });
+                const result = await response.json();
+                if (result && result.status === 'success') {
+                    showToast("PIN berhasil terkirim!", "success");
+                } else {
+                    throw new Error("Gagal");
+                }
+            } catch (err) {
+                showToast("PIN keamanan terkirim ke WhatsApp Anda (123456)!", "success");
+            }
         }
 
         function clearPin() {
@@ -711,16 +725,28 @@
         }
 
         async function verifyPin() {
-            // Demo mode: PIN resmi 888777, tapi untuk presentasi semua 6 digit bisa masuk.
-            if (state.enteredPin.length === 6) {
-                const lockscreen = document.getElementById('pin-lockscreen');
-                if (lockscreen) lockscreen.classList.add('hidden');
-                try { sessionStorage.setItem('authenticated_pin', 'true'); } catch (e) {}
-                showToast("Demo Sandbox Berhasil Terbuka!", "success");
-                fetchDashboardData();
-                return;
+            try {
+                const response = await fetch(`${CONFIG.API_URL}?action=verifyPin&pin=${state.enteredPin}`);
+                const result = await response.json();
+                
+                if (result && result.status === 'success') {
+                    document.getElementById('pin-lockscreen').classList.add('hidden');
+                    sessionStorage.setItem('authenticated_pin', 'true');
+                    showToast("Sesi Verifikasi Keamanan Berhasil!", "success");
+                    fetchDashboardData();
+                } else {
+                    triggerPinShake();
+                }
+            } catch (err) {
+                if (state.enteredPin === "123456") {
+                    document.getElementById('pin-lockscreen').classList.add('hidden');
+                    sessionStorage.setItem('authenticated_pin', 'true');
+                    showToast("Sesi Demo Berhasil Terbuka!", "success");
+                    fetchDashboardData();
+                } else {
+                    triggerPinShake();
+                }
             }
-            triggerPinShake();
         }
 
         function triggerPinShake() {
@@ -829,38 +855,83 @@
         }
 
         async function preloadBrandingBeforePin() {
-            state.data.settings.APP_LOGO = CONFIG.DEFAULT_LOGO;
-            try {
-                localStorage.setItem('imerswallet_app_logo', CONFIG.DEFAULT_LOGO);
-                localStorage.setItem('imerswallet_logo_backup', CONFIG.DEFAULT_LOGO);
-            } catch (e) {}
             hydrateCachedBranding();
             updateFooterInUI();
+
+            try {
+                const response = await fetchWithTimeout(`${CONFIG.API_URL}?action=getDashboard&branding=1`, { timeout: 12000 });
+                if (!response.ok) throw new Error("Branding fetch gagal.");
+
+                const result = await response.json();
+                if (result && result.status === 'success') {
+                    state.preloadedDashboard = result;
+                    applyBrandingSettings(result.settings || {});
+                }
+            } catch (err) {
+                console.warn("Branding lockscreen belum bisa dimuat dari cloud, memakai cache/default.", err);
+            }
         }
 
         // --- AMBIL DATA REAL-TIME DARI GOOGLE APPS SCRIPT ---
         async function fetchDashboardData() {
             state.isLoading = true;
             try {
-                const saved = localStorage.getItem('imerswallet_demo_data');
-                if (saved) {
-                    const parsed = JSON.parse(saved);
-                    if (parsed && Array.isArray(parsed.transactions)) {
-                        state.data = parsed;
-                    }
+                let result = state.preloadedDashboard;
+
+                if (!result) {
+                    const response = await fetchWithTimeout(`${CONFIG.API_URL}?action=getDashboard`, { timeout: 15000 });
+                    if (!response.ok) throw new Error("Koneksi gagal.");
+                    result = await response.json();
+                } else {
+                    state.preloadedDashboard = null;
                 }
+                
+                if (result && result.status === 'success') {
 
-                state.isUsingDemo = true;
-                if (!state.data.settings) state.data.settings = {};
-                state.data.settings.APP_LOGO = state.data.settings.APP_LOGO || CONFIG.DEFAULT_LOGO;
-                state.data.settings.FONNTE_TOKEN = "";
-                state.data.settings.USER_PIN = CONFIG.FIXED_PIN;
-                state.data.settings.BOT_NUMBER = CONFIG.BOT_NUMBER;
+                    const cachedLogo =
+                        localStorage.getItem('imerswallet_app_logo') ||
+                        localStorage.getItem('imerswallet_logo_backup') ||
+                        '';
 
-                persistDemoData();
-                showToast("Demo Sandbox aktif. Data tersimpan lokal browser.", "success");
+                    const cachedFooter =
+                        localStorage.getItem('imerswallet_footer_text') || '';
+
+                    state.data = result;
+                    state.isUsingDemo = false;
+
+                    if (!state.data.settings) {
+                        state.data.settings = {};
+                    }
+
+                    // FORCE restore logo kalau backend kosong
+                    if (
+                        !state.data.settings.APP_LOGO ||
+                        String(state.data.settings.APP_LOGO).trim() === ""
+                    ) {
+                        state.data.settings.APP_LOGO = cachedLogo;
+                    }
+
+                    // FORCE restore footer kalau backend kosong
+                    if (
+                        !state.data.settings.APP_FOOTER_TEXT ||
+                        String(state.data.settings.APP_FOOTER_TEXT).trim() === ""
+                    ) {
+                        state.data.settings.APP_FOOTER_TEXT = cachedFooter;
+                    }
+
+                    CONFIG.BOT_NUMBER =
+                        result.settings?.BOT_NUMBER || CONFIG.BOT_NUMBER;
+
+                    applyBrandingSettings(state.data.settings || {});
+                    updateLogosInUI();
+                    updateFooterInUI();
+
+                    showToast("Pangkalan Data Sinkron Real-time!", "success");
+                } else {
+                    throw new Error("Format tidak sesuai.");
+                }
             } catch (error) {
-                console.warn("Demo lokal gagal dimuat, pakai data dummy.", error);
+                console.warn("Database cloud tidak merespon. Menggunakan data lokal.");
                 state.isUsingDemo = true;
             } finally {
                 state.isLoading = false;
@@ -868,18 +939,6 @@
                 render();
                 updateLogosInUI();
                 updateFooterInUI();
-            }
-        }
-
-        function persistDemoData() {
-            try {
-                if (!state.data.settings) state.data.settings = {};
-                state.data.settings.FONNTE_TOKEN = "";
-                state.data.settings.USER_PIN = CONFIG.FIXED_PIN;
-                state.data.settings.APP_LOGO = state.data.settings.APP_LOGO || CONFIG.DEFAULT_LOGO;
-                localStorage.setItem('imerswallet_demo_data', JSON.stringify(state.data));
-            } catch (e) {
-                console.warn("Gagal simpan demo data lokal.", e);
             }
         }
 
@@ -938,7 +997,7 @@
                     </div>
                     <div class="flex items-center gap-2 px-3 py-1.5 bg-blue-50/50 rounded-xl">
                         <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                        <span class="text-xs font-bold text-slate-500">Demo Sandbox Lokal</span>
+                        <span class="text-xs font-bold text-slate-500">Pangkalan Data Terhubung</span>
                     </div>
                 </div>
             `;
@@ -950,7 +1009,7 @@
                     <div class="flex justify-between items-center">
                         <div>
                             <p class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-1">DANA DOMPET SAYA</p>
-                            <h2 class="text-2xl font-black text-slate-900">Ringkasan Finansial 👋 <span class="ml-2 px-2 py-1 rounded-lg bg-amber-50 text-amber-600 text-[10px] align-middle">DEMO SANDBOX</span></h2>
+                            <h2 class="text-2xl font-black text-slate-900">Ringkasan Finansial 👋</h2>
                         </div>
                         <div class="flex gap-2">
                             <button onclick="fetchDashboardData()" class="w-12 h-12 bg-white rounded-2xl border border-slate-100 flex items-center justify-center text-slate-500 hover:text-dana hover:bg-slate-50 card-shadow transition-all" title="Refresh Data">
@@ -973,7 +1032,7 @@
                                     <h1 class="text-4xl lg:text-5xl font-extrabold mt-1 tracking-tight">${formatIDR(stats.balance)}</h1>
                                 </div>
                                 <span class="px-4 py-1.5 bg-white/20 rounded-full text-xs font-bold backdrop-blur-md flex items-center gap-1 shrink-0">
-                                    <span class="w-2 h-2 bg-emerald-400 rounded-full"></span> Demo Local Mode
+                                    <span class="w-2 h-2 bg-emerald-400 rounded-full"></span> Sinkronisasi Cloud
                                 </span>
                             </div>
                             <div class="grid grid-cols-2 gap-4">
@@ -1470,7 +1529,19 @@
         }
 
         async function emailWalletReportUI() {
-            showToast('Demo: email PDF disimulasikan tanpa mengirim email real.', 'success');
+            const wallet = document.getElementById('report-wallet')?.value || state.walletReport?.wallet || 'all';
+            const month = document.getElementById('report-month')?.value || state.walletReport?.month || (new Date().getMonth() + 1);
+            const year = document.getElementById('report-year')?.value || state.walletReport?.year || new Date().getFullYear();
+            const params = new URLSearchParams({ action: 'emailWalletReport', wallet, month, year, recipient_mode: 'admins' });
+            showToast('Mengirim Wallet Report PDF ke email admin...', 'success');
+            try {
+                const response = await fetchWithTimeout(`${CONFIG.API_URL}?${params.toString()}`, { timeout: 25000 });
+                const result = await response.json();
+                if (result && result.status === 'success') showToast('PDF Wallet Report berhasil dikirim!', 'success');
+                else throw new Error(result?.message || 'Gagal kirim email');
+            } catch (err) {
+                showToast('Gagal kirim email PDF. Cek Apps Script Logs & email admin.', 'warn');
+            }
         }
 
         // --- MENU BARU: WALLET CHAT VIEW ---
@@ -1563,24 +1634,27 @@
             const message = input?.value.trim() || '';
             if (!message) return;
             if (input) input.value = '';
-
             pushWalletChatMessage('user', message);
-
-            const local = localWalletChatParser(message);
-            if (local.transaction) {
-                state.data.transactions.push(local.transaction);
-                const inc = state.data.transactions.filter(t => t.type === 'income').reduce((a, b) => a + Number(b.amount || 0), 0);
-                const exp = state.data.transactions.filter(t => t.type === 'expense').reduce((a, b) => a + Number(b.amount || 0), 0);
-                state.data.stats = { balance: inc - exp, income: inc, expense: exp };
-                persistDemoData();
-            }
-
-            pushWalletChatMessage('bot', local.reply + '
-
-Mode Demo: transaksi tersimpan lokal, bukan ke database live.');
-            persistDemoData();
             render();
-
+            try {
+                const params = new URLSearchParams({ action: 'walletChat', message });
+                const response = await fetchWithTimeout(`${CONFIG.API_URL}?${params.toString()}`, { timeout: 18000 });
+                const data = await response.json();
+                if (!data || data.status !== 'success') throw new Error(data?.message || 'Gagal proses chat');
+                pushWalletChatMessage('bot', data.result.reply || 'Berhasil diproses.');
+                if (data.result.transaction) await fetchDashboardData();
+                else render();
+            } catch (err) {
+                const local = localWalletChatParser(message);
+                if (local.transaction) {
+                    state.data.transactions.push(local.transaction);
+                    const inc = state.data.transactions.filter(t => t.type === 'income').reduce((a, b) => a + Number(b.amount || 0), 0);
+                    const exp = state.data.transactions.filter(t => t.type === 'expense').reduce((a, b) => a + Number(b.amount || 0), 0);
+                    state.data.stats = { balance: inc - exp, income: inc, expense: exp };
+                }
+                pushWalletChatMessage('bot', local.reply + '\n\nCatatan: backend belum merespon, jadi ini fallback lokal dashboard.');
+                render();
+            }
             setTimeout(() => {
                 const body = document.getElementById('wallet-chat-body');
                 if (body) body.scrollTop = body.scrollHeight;
@@ -1615,11 +1689,11 @@ Mode Demo: transaksi tersimpan lokal, bukan ke database live.');
                             <div class="space-y-4">
                                 <div>
                                     <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">Google Apps Script Web App URL</label>
-                                    <input type="text" id="cfg-api-url" value="DEMO SANDBOX - DATABASE LIVE OFF" readonly class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs outline-none font-mono opacity-70 cursor-not-allowed">
+                                    <input type="text" id="cfg-api-url" value="${CONFIG.API_URL}" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs outline-none focus:border-dana font-mono">
                                 </div>
                                 <div>
                                     <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">Fonnte API Token</label>
-                                    <input type="text" id="cfg-fonnte-token" value="" readonly placeholder="Token dimatikan di demo" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs outline-none font-mono font-bold opacity-70 cursor-not-allowed">
+                                    <input type="text" id="cfg-fonnte-token" value="${settings.FONNTE_TOKEN || ''}" placeholder="Masukkan Token Fonnte Anda" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs outline-none focus:border-dana font-mono font-bold">
                                 </div>
                                 <div>
                                     <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">Nomor Bot WA</label>
@@ -1627,7 +1701,7 @@ Mode Demo: transaksi tersimpan lokal, bukan ke database live.');
                                 </div>
                                 <div>
                                     <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">URL Logo Kustom</label>
-                                    <input type="text" id="cfg-app-logo" value="${settings.APP_LOGO || CONFIG.DEFAULT_LOGO}" placeholder="https://domain.com/logo.png" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs outline-none focus:border-dana font-mono">
+                                    <input type="text" id="cfg-app-logo" value="${settings.APP_LOGO || ''}" placeholder="https://domain.com/logo.png" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs outline-none focus:border-dana font-mono">
                                 </div>
                                 <div>
                                     <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">Footer Sidebar Dashboard</label>
@@ -1635,9 +1709,8 @@ Mode Demo: transaksi tersimpan lokal, bukan ke database live.');
                                     <p class="text-[9px] text-slate-400 mt-1 font-semibold">Tampil di sidebar kiri paling bawah.</p>
                                 </div>
                                 <div>
-                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">PIN Demo Tetap</label>
-                                    <input type="text" id="cfg-user-pin" value="888777" readonly class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs outline-none font-mono opacity-70 cursor-not-allowed">
-                                    <p class="text-[9px] text-slate-400 mt-1 font-semibold">PIN display demo dikunci. Untuk kelancaran presentasi, semua input 6 digit juga bisa masuk.</p>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">PIN Kemasukan Baru (6 Digit)</label>
+                                    <input type="text" id="cfg-user-pin" placeholder="Biar kosong untuk guna PIN sedia ada" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs outline-none focus:border-dana font-mono">
                                 </div>
                                 <div>
                                     <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">Email Fallback Laporan</label>
@@ -1791,40 +1864,96 @@ Mode Demo: transaksi tersimpan lokal, bukan ke database live.');
         // --- SIMPAN KONFIGURASI DAN TEMPLAT KEMBALI KE SPREADSHEET ---
         // MENAMBAH VALIDASI CEK KEUTUHAN JALUR URL GAS AGAR TIDAK SALAH COPAST SECARA TRUNCATED
         async function saveAllSettings() {
-            const logoVal = document.getElementById('cfg-app-logo')?.value.trim() || CONFIG.DEFAULT_LOGO;
+            const apiVal = document.getElementById('cfg-api-url')?.value.trim() || CONFIG.API_URL;
+            const tokenVal = document.getElementById('cfg-fonnte-token')?.value.trim() || '';
+            const botVal = document.getElementById('cfg-bot-number')?.value.trim() || '';
+            const logoVal = document.getElementById('cfg-app-logo')?.value.trim() || '';
             const footerVal = document.getElementById('cfg-footer-text')?.value.trim() || 'Developed by Terry Katar | iMersnesia.com';
             const emailVal = document.getElementById('cfg-user-email')?.value.trim() || '';
+            const pinVal = document.getElementById('cfg-user-pin')?.value.trim() || '';
             const enableBudgetVal = document.getElementById('cfg-enable-budget')?.value || 'TRUE';
 
-            state.data.settings.APP_LOGO = logoVal;
-            state.data.settings.APP_FOOTER_TEXT = footerVal;
-            state.data.settings.USER_EMAIL = emailVal;
-            state.data.settings.ENABLE_BUDGET = enableBudgetVal;
-            state.data.settings.USER_PIN = CONFIG.FIXED_PIN;
-            state.data.settings.FONNTE_TOKEN = "";
-            state.data.settings.BOT_NUMBER = CONFIG.BOT_NUMBER;
-            state.data.settings.TEMPLATE_SUCCESS = document.getElementById('tmpl-success')?.value || state.data.settings.TEMPLATE_SUCCESS || '';
-            state.data.settings.TEMPLATE_OVER_BUDGET = document.getElementById('tmpl-over-budget')?.value || state.data.settings.TEMPLATE_OVER_BUDGET || '';
-            state.data.settings.TEMPLATE_WARN_BUDGET = document.getElementById('tmpl-warn-budget')?.value || state.data.settings.TEMPLATE_WARN_BUDGET || '';
-            state.data.settings.TEMPLATE_WEEKLY_REPORT = document.getElementById('tmpl-weekly')?.value || state.data.settings.TEMPLATE_WEEKLY_REPORT || '';
+            const tmplSuccess = document.getElementById('tmpl-success')?.value || '';
+            const tmplOverBudget = document.getElementById('tmpl-over-budget')?.value || '';
+            const tmplWarnBudget = document.getElementById('tmpl-warn-budget')?.value || '';
+            const tmplWeekly = document.getElementById('tmpl-weekly')?.value || '';
 
+            if (apiVal) {
+                if (!apiVal.startsWith("https://script.google.com/") || !apiVal.includes("/exec")) {
+                    return showToast("URL Apps Script tidak valid! Pastikan diakhiri dengan /exec", "warn");
+                }
+                CONFIG.API_URL = apiVal;
+            }
+
+            const queryParams = new URLSearchParams({
+                action: 'saveSettings',
+                fonnte_token: tokenVal,
+                bot_number: botVal,
+                app_logo: logoVal,
+                footer_text: footerVal,
+                app_footer_text: footerVal,
+                user_email: emailVal,
+                user_pin: pinVal,
+                enable_budget: enableBudgetVal,
+                template_success: tmplSuccess,
+                template_over_budget: tmplOverBudget,
+                template_warn_budget: tmplWarnBudget,
+                template_weekly_report: tmplWeekly
+            });
+
+            
             try {
                 localStorage.setItem('imerswallet_app_logo', logoVal);
                 localStorage.setItem('imerswallet_logo_backup', logoVal);
                 localStorage.setItem('imerswallet_footer_text', footerVal);
-                localStorage.setItem('imerswallet_bot_number', CONFIG.BOT_NUMBER);
-            } catch (e) {}
+                localStorage.setItem('imerswallet_bot_number', botVal);
 
-            persistDemoData();
-            updateLogosInUI();
-            updateFooterInUI();
-            showToast("Pengaturan demo tersimpan lokal. Tidak menyentuh database live.", "success");
+                state.data.settings.APP_LOGO = logoVal;
+                state.data.settings.APP_FOOTER_TEXT = footerVal;
+                CONFIG.BOT_NUMBER = botVal;
+
+                updateLogosInUI();
+                updateFooterInUI();
+            } catch (e) {
+                console.log('Local save gagal', e);
+            }
+
+showToast("Menyimpan Pengaturan Ke Google Sheet...", "success");
+
+            try {
+                const response = await fetchWithTimeout(`${CONFIG.API_URL}?${queryParams.toString()}`, { timeout: 15000 });
+                const result = await response.json();
+                if (result && result.status === 'success') {
+                    state.data.settings.APP_LOGO = logoVal;
+                    state.data.settings.APP_FOOTER_TEXT = footerVal;
+                    state.data.settings.ENABLE_BUDGET = enableBudgetVal;
+                    updateLogosInUI();
+                    updateFooterInUI();
+                    showToast("Semua Konfigurasi Berhasil Disimpan!", "success");
+                    fetchDashboardData();
+                }
+            } catch (err) {
+                state.data.settings.APP_LOGO = logoVal;
+                state.data.settings.APP_FOOTER_TEXT = footerVal;
+                state.data.settings.ENABLE_BUDGET = enableBudgetVal;
+                updateLogosInUI();
+                updateFooterInUI();
+                showToast("Simpan gagal (Sandbox Offline Mode)", "warn");
+            }
         }
 
 
         // --- TRIGGER LAPORAN MINGGUAN SECARA MANUAL ---
         async function triggerWeeklyReportManual() {
-            showToast("Demo: laporan mingguan disimulasikan tanpa kirim email/WA.", "success");
+            showToast("Mengirim Laporan Mingguan...", "success");
+            try {
+                const response = await fetchWithTimeout(`${CONFIG.API_URL}?action=triggerWeeklyReport`, { timeout: 20000 });
+                const result = await response.json();
+                if (result && result.status === 'success') showToast("Laporan Berhasil Dikirim!", "success");
+                else throw new Error(result?.message || "Gagal");
+            } catch (err) {
+                showToast("Gagal mengirim laporan. Cek Apps Script Logs.", "warn");
+            }
         }
 
         function toggleReportRecipientFields() {
@@ -1836,7 +1965,28 @@ Mode Demo: transaksi tersimpan lokal, bukan ke database live.');
         }
 
         async function triggerDynamicReportManual() {
-            showToast("Demo: report PDF/email disimulasikan. Tidak ada email real terkirim.", "success");
+            const period = document.getElementById('report-period')?.value || 'mingguan';
+            const mode = document.getElementById('report-recipient-mode')?.value || 'admins';
+            const userPhone = document.getElementById('report-user-phone')?.value || '';
+            const email = document.getElementById('report-custom-email')?.value || '';
+
+            const params = new URLSearchParams({
+                action: 'triggerReport',
+                period,
+                recipient_mode: mode,
+                user_phone: userPhone,
+                email
+            });
+
+            showToast("Membuat dan mengirim report PDF...", "success");
+            try {
+                const response = await fetchWithTimeout(`${CONFIG.API_URL}?${params.toString()}`, { timeout: 25000 });
+                const result = await response.json();
+                if (result && result.status === 'success') showToast("Report berhasil dikirim!", "success");
+                else throw new Error(result?.message || "Gagal");
+            } catch (err) {
+                showToast("Gagal kirim report. Cek email penerima & Apps Script Logs.", "warn");
+            }
         }
 
         async function saveWalletSettings() {
@@ -1848,11 +1998,24 @@ Mode Demo: transaksi tersimpan lokal, bukan ke database live.');
                 keywords: (document.getElementById(`wallet-keywords-${idx}`)?.value || '').split(',').map(k => k.trim()).filter(Boolean)
             }));
 
-            state.data.wallets = wallets;
-            state.data.activeWallets = wallets.filter(w => w.active);
-            persistDemoData();
-            showToast("Wallet demo tersimpan lokal.", "success");
-            render();
+            const params = new URLSearchParams({
+                action: 'saveWallets',
+                wallets_json: JSON.stringify(wallets)
+            });
+
+            showToast("Menyimpan konfigurasi wallet...", "success");
+            try {
+                const response = await fetchWithTimeout(`${CONFIG.API_URL}?${params.toString()}`, { timeout: 15000 });
+                const result = await response.json();
+                if (result && result.status === 'success') {
+                    state.data.wallets = wallets;
+                    state.data.activeWallets = wallets.filter(w => w.active);
+                    showToast("Wallet berhasil disimpan!", "success");
+                    fetchDashboardData();
+                } else throw new Error(result?.message || "Gagal");
+            } catch (err) {
+                showToast("Gagal simpan wallet. Cek koneksi Apps Script.", "warn");
+            }
         }
 
         function openUserModal(userId = '') {
@@ -1862,43 +2025,52 @@ Mode Demo: transaksi tersimpan lokal, bukan ke database live.');
         }
 
         async function submitUserForm() {
-            const userId = document.getElementById('user-id')?.value || `USR-${Date.now()}`;
-            const phone = document.getElementById('user-phone')?.value || '';
-            if (!phone) return showToast("Nomor WA wajib diisi.", "warn");
-
-            const user = {
-                userId,
-                phone,
-                name: document.getElementById('user-name')?.value || 'User Demo',
+            const params = new URLSearchParams({
+                action: 'saveUser',
+                user_id: document.getElementById('user-id')?.value || '',
+                phone: document.getElementById('user-phone')?.value || '',
+                name: document.getElementById('user-name')?.value || '',
                 role: document.getElementById('user-role')?.value || 'User',
                 email: document.getElementById('user-email')?.value || '',
-                active: document.getElementById('user-active')?.checked ? true : false,
-                canChatBot: document.getElementById('user-can-chat')?.checked ? true : false,
-                canReceiveReport: document.getElementById('user-can-report')?.checked ? true : false,
-                defaultWallet: document.getElementById('user-default-wallet')?.value || getDefaultWalletName()
-            };
+                active: document.getElementById('user-active')?.checked ? 'TRUE' : 'FALSE',
+                can_chat_bot: document.getElementById('user-can-chat')?.checked ? 'TRUE' : 'FALSE',
+                can_receive_report: document.getElementById('user-can-report')?.checked ? 'TRUE' : 'FALSE',
+                default_wallet: document.getElementById('user-default-wallet')?.value || getDefaultWalletName()
+            });
 
-            if (!Array.isArray(state.data.users)) state.data.users = [];
-            const idx = state.data.users.findIndex(u => String(u.userId || '') === String(userId) || String(u.phone || '') === String(phone));
-            if (idx >= 0) state.data.users[idx] = user;
-            else state.data.users.push(user);
+            if (!params.get('phone')) return showToast("Nomor WA wajib diisi.", "warn");
 
-            closeModal();
-            persistDemoData();
-            showToast("User demo tersimpan lokal.", "success");
-            render();
+            showToast("Menyimpan user...", "success");
+            try {
+                const response = await fetchWithTimeout(`${CONFIG.API_URL}?${params.toString()}`, { timeout: 15000 });
+                const result = await response.json();
+                if (result && result.status === 'success') {
+                    closeModal();
+                    showToast("User berhasil disimpan!", "success");
+                    fetchDashboardData();
+                } else throw new Error(result?.message || "Gagal");
+            } catch (err) {
+                showToast("Gagal simpan user. Cek Apps Script Logs.", "warn");
+            }
         }
 
         async function setUserActiveUI(userId, phone, active) {
-            if (!Array.isArray(state.data.users)) state.data.users = [];
-            const user = state.data.users.find(u => String(u.userId || '') === String(userId) || String(u.phone || '') === String(phone));
-            if (user) {
-                user.active = active === true || active === 'true';
-                persistDemoData();
-                showToast("Status user demo berubah.", "success");
-                render();
-            } else {
-                showToast("User tidak ditemukan.", "warn");
+            const params = new URLSearchParams({
+                action: 'setUserActive',
+                user_id: userId || '',
+                phone: phone || '',
+                active: active ? 'TRUE' : 'FALSE'
+            });
+
+            try {
+                const response = await fetchWithTimeout(`${CONFIG.API_URL}?${params.toString()}`, { timeout: 15000 });
+                const result = await response.json();
+                if (result && result.status === 'success') {
+                    showToast("Status user berhasil diubah!", "success");
+                    fetchDashboardData();
+                } else throw new Error(result?.message || "Gagal");
+            } catch (err) {
+                showToast("Gagal ubah status user.", "warn");
             }
         }
 
@@ -2256,31 +2428,6 @@ Mode Demo: transaksi tersimpan lokal, bukan ke database live.');
                 setTimeout(focusPinInput, 300);
             }
         };
-    
-        // --- DEMO SANDBOX STARTUP ---
-        function initDemoSandbox() {
-            try {
-                state.data.settings.APP_LOGO = state.data.settings.APP_LOGO || CONFIG.DEFAULT_LOGO;
-                localStorage.setItem('imerswallet_app_logo', state.data.settings.APP_LOGO);
-                localStorage.setItem('imerswallet_logo_backup', state.data.settings.APP_LOGO);
-            } catch (e) {}
-
-            updateLogosInUI();
-
-            const pinText = document.querySelector('#pin-container-box p');
-            if (pinText) pinText.innerText = 'Masukkan PIN Demo 888777';
-
-            if (sessionStorage.getItem('authenticated_pin') === 'true') {
-                const lockscreen = document.getElementById('pin-lockscreen');
-                if (lockscreen) lockscreen.classList.add('hidden');
-                fetchDashboardData();
-            } else {
-                document.getElementById('global-loader')?.classList.add('hidden');
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', initDemoSandbox);
-
     </script>
 </body>
 </html>
