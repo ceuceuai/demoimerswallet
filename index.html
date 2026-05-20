@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -5,20 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>iMersWallet - Asisten Keuangan Pribadi & Bisnis</title>
     <!-- Tailwind CSS untuk Desain Responsif & Modern -->
-    <script src="https://cdn.tailwindcss.com">
-window.addEventListener('load', function(){
-    try {
-        localStorage.setItem('imerswallet_app_logo', 'https://imersnesia.com/wp-content/uploads/2026/05/Final-Logo-imerswallet-WA-only.webp');
-        localStorage.setItem('imerswallet_logo_backup', 'https://imersnesia.com/wp-content/uploads/2026/05/Final-Logo-imerswallet-WA-only.webp');
-    } catch(e){}
-
-    const logoWrap = document.getElementById('lockscreen-logo-container');
-    if(logoWrap && !logoWrap.querySelector('img')){
-        logoWrap.innerHTML = `<img src="https://imersnesia.com/wp-content/uploads/2026/05/Final-Logo-imerswallet-WA-only.webp" style="height:80px;max-width:240px;object-fit:contain;display:block;margin:auto;">`;
-    }
-});
-
-</script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <!-- ApexCharts untuk Visualisasi Data Finansial -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <!-- Lucide Icons untuk Ikon Premium Modern -->
@@ -247,13 +235,10 @@ window.addEventListener('load', function(){
             <div class="text-center space-y-2">
                 <!-- LOGO DINAMIS PADA LOCKSCREEN -->
                 <div id="lockscreen-logo-container" class="cursor-pointer flex justify-center w-full" onclick="focusPinInput()">
-                    <img src="https://imersnesia.com/wp-content/uploads/2026/05/Final-Logo-imerswallet-WA-only.webp" 
-         alt="iMersWallet"
-         style="height:80px;max-width:240px;object-fit:contain;display:block;margin:auto;"
-         referrerpolicy="no-referrer">
+                    <!-- Diisi otomatis oleh fungsi renderLogo() -->
                 </div>
                 <h2 class="text-3xl font-black mt-4"><span class="text-[#108EE9]">iMers</span><span class="text-[#00E5FF]">WALLET</span></h2>
-                <p class="text-sm text-slate-300 font-medium">Masukkan PIN Demo 888777 (Auto Login)</p>
+                <p class="text-sm text-slate-300 font-medium">Masukkan PIN Demo 888777</p>
             </div>
 
             <!-- Titik Penunjuk PIN (Mengetuk area ini akan fokus ke input HP) -->
@@ -453,7 +438,7 @@ window.addEventListener('load', function(){
                 FONNTE_TOKEN: "",
                 BOT_NUMBER: "628123456789",
                 USER_EMAIL: "owner@example.com",
-                APP_LOGO: "", // Default kosong (akan fallback ke ikon Lucide Wallet)
+                APP_LOGO: "https://imersnesia.com/wp-content/uploads/2026/05/Final-Logo-imerswallet-WA-only.webp", // Demo logo default
                 TEMPLATE_SUCCESS: "✅ *Pencatatan Berhasil!*\n\n📂 *KANTONG: {wallet}*\n💰 *TIPE: {type}*\n📝 Kategori: {category}\n💬 Catatan: {note}\n💸 Nominal: *Rp{amount}*",
                 TEMPLATE_OVER_BUDGET: "⚠️ *WARNING BUDGET JEBOL!* ⚠️\n\nPengeluaran Anda pada kategori *{category}* telah melebihi batas anggaran bulanan!\n\n💸 Terpakai: *Rp{spent}*\n📊 Batas Anggaran: *Rp{limit}*",
                 TEMPLATE_WARN_BUDGET: "⚠️ *PERINGATAN HEMAT!* ⚠️\n\nPengeluaran kategori *{category}* sudah mencapai *{ratio}%* dari batas anggaran bulanan Anda.",
@@ -489,7 +474,7 @@ window.addEventListener('load', function(){
             BOT_NUMBER: "628123456789",
             WRITE_ENABLED: false,
             FIXED_PIN: "888777",
-            DEFAULT_DEMO_LOGO: "https://imersnesia.com/wp-content/uploads/2026/05/Final-Logo-imerswallet-WA-only.webp"
+            DEFAULT_LOGO: "https://imersnesia.com/wp-content/uploads/2026/05/Final-Logo-imerswallet-WA-only.webp"
         };
 
         // --- PEMETAAN IKON KATEGORI TRANSAKSI (Definisi Awal) ---
@@ -623,25 +608,17 @@ window.addEventListener('load', function(){
         // --- RENDER LOGO DINAMIS (Logo Kustom / Ikon Dompet Default) ---
         // MEMBUAT LOGO TRANSPARAN BEBAS DARI BACKGROUND PUTIH KOTAK
         function renderLogo(sizeClass = "w-10 h-10", iconSize = "w-5 h-5") {
-            const logoUrl = state.data.settings.APP_LOGO || "";
+            const logoUrl = (state?.data?.settings?.APP_LOGO || CONFIG.DEFAULT_LOGO || "").trim();
             const isLockscreenLogo = sizeClass.includes("w-24") || sizeClass.includes("h-24") || sizeClass.includes("w-20") || sizeClass.includes("h-20");
 
-            if (
-                logoUrl &&
-                logoUrl.trim() !== "" &&
-                (
-                    logoUrl.startsWith("http") ||
-                    logoUrl.startsWith("data:image") ||
-                    logoUrl.startsWith("./") ||
-                    logoUrl.startsWith("/")
-                )
-            ) {
+            if (logoUrl) {
                 return `
                     <div class="relative ${sizeClass} mx-auto flex items-center justify-center logo-transparent-wrap">
-                        <img 
-                            src="${logoUrl}" 
-                            class="logo-transparent-img ${isLockscreenLogo ? 'scale-[1.35]' : 'scale-[1.08]'}" 
-                            alt="Logo iMersWallet" 
+                        <img
+                            src="${logoUrl}"
+                            class="logo-transparent-img ${isLockscreenLogo ? 'scale-[1.35]' : 'scale-[1.08]'}"
+                            alt="Logo iMersWallet"
+                            referrerpolicy="no-referrer"
                             onerror="handleLogoError(this, '${sizeClass}', '${iconSize}')"
                         >
                     </div>
@@ -719,15 +696,12 @@ window.addEventListener('load', function(){
         }
 
         async function requestForgotPin() {
-            alert("PIN Demo: 888777");
+            showToast("PIN Demo tetap: 888777", "success");
         }
 
-        
-function clearPin() {
-    state.enteredPin = '';
-    updatePinDots();
-}
-
+        function clearPin() {
+            handlePinInput("");
+        }
 
         function backspacePin() {
             if (state.enteredPin.length > 0) {
@@ -737,14 +711,16 @@ function clearPin() {
         }
 
         async function verifyPin() {
-            if (String(state.enteredPin) === "888777") {
-                document.getElementById('pin-lockscreen').classList.add('hidden');
-                sessionStorage.setItem('authenticated_pin', 'true');
+            // Demo mode: PIN resmi 888777, tapi untuk presentasi semua 6 digit bisa masuk.
+            if (state.enteredPin.length === 6) {
+                const lockscreen = document.getElementById('pin-lockscreen');
+                if (lockscreen) lockscreen.classList.add('hidden');
+                try { sessionStorage.setItem('authenticated_pin', 'true'); } catch (e) {}
                 showToast("Demo Sandbox Berhasil Terbuka!", "success");
                 fetchDashboardData();
-            } else {
-                triggerPinShake();
+                return;
             }
+            triggerPinShake();
         }
 
         function triggerPinShake() {
@@ -853,6 +829,11 @@ function clearPin() {
         }
 
         async function preloadBrandingBeforePin() {
+            state.data.settings.APP_LOGO = CONFIG.DEFAULT_LOGO;
+            try {
+                localStorage.setItem('imerswallet_app_logo', CONFIG.DEFAULT_LOGO);
+                localStorage.setItem('imerswallet_logo_backup', CONFIG.DEFAULT_LOGO);
+            } catch (e) {}
             hydrateCachedBranding();
             updateFooterInUI();
         }
@@ -864,31 +845,26 @@ function clearPin() {
                 const saved = localStorage.getItem('imerswallet_demo_data');
                 if (saved) {
                     const parsed = JSON.parse(saved);
-                    if (parsed && parsed.settings && Array.isArray(parsed.transactions)) {
+                    if (parsed && Array.isArray(parsed.transactions)) {
                         state.data = parsed;
                     }
                 }
+
                 state.isUsingDemo = true;
                 if (!state.data.settings) state.data.settings = {};
-
-                if (
-                    !state.data.settings.APP_LOGO ||
-                    String(state.data.settings.APP_LOGO).trim() === ""
-                ) {
-                    state.data.settings.APP_LOGO = "https://imersnesia.com/wp-content/uploads/2026/05/Final-Logo-imerswallet-WA-only.webp";
-                }
-                state.data.settings.USER_PIN = CONFIG.FIXED_PIN;
+                state.data.settings.APP_LOGO = state.data.settings.APP_LOGO || CONFIG.DEFAULT_LOGO;
                 state.data.settings.FONNTE_TOKEN = "";
+                state.data.settings.USER_PIN = CONFIG.FIXED_PIN;
                 state.data.settings.BOT_NUMBER = CONFIG.BOT_NUMBER;
-                applyBrandingSettings(state.data.settings || {});
-                showToast("Demo Sandbox aktif. Semua data tersimpan lokal.", "success");
+
+                persistDemoData();
+                showToast("Demo Sandbox aktif. Data tersimpan lokal browser.", "success");
             } catch (error) {
-                console.warn("Demo data lokal belum tersedia. Memakai dummy data.", error);
+                console.warn("Demo lokal gagal dimuat, pakai data dummy.", error);
                 state.isUsingDemo = true;
             } finally {
                 state.isLoading = false;
                 document.getElementById('global-loader')?.classList.add('hidden');
-                persistDemoData();
                 render();
                 updateLogosInUI();
                 updateFooterInUI();
@@ -898,11 +874,12 @@ function clearPin() {
         function persistDemoData() {
             try {
                 if (!state.data.settings) state.data.settings = {};
-                state.data.settings.USER_PIN = CONFIG.FIXED_PIN;
                 state.data.settings.FONNTE_TOKEN = "";
+                state.data.settings.USER_PIN = CONFIG.FIXED_PIN;
+                state.data.settings.APP_LOGO = state.data.settings.APP_LOGO || CONFIG.DEFAULT_LOGO;
                 localStorage.setItem('imerswallet_demo_data', JSON.stringify(state.data));
             } catch (e) {
-                console.warn("Gagal menyimpan demo data lokal.", e);
+                console.warn("Gagal simpan demo data lokal.", e);
             }
         }
 
@@ -961,7 +938,7 @@ function clearPin() {
                     </div>
                     <div class="flex items-center gap-2 px-3 py-1.5 bg-blue-50/50 rounded-xl">
                         <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                        <span class="text-xs font-bold text-slate-500">Pangkalan Data Terhubung</span>
+                        <span class="text-xs font-bold text-slate-500">Demo Sandbox Lokal</span>
                     </div>
                 </div>
             `;
@@ -996,7 +973,7 @@ function clearPin() {
                                     <h1 class="text-4xl lg:text-5xl font-extrabold mt-1 tracking-tight">${formatIDR(stats.balance)}</h1>
                                 </div>
                                 <span class="px-4 py-1.5 bg-white/20 rounded-full text-xs font-bold backdrop-blur-md flex items-center gap-1 shrink-0">
-                                    <span class="w-2 h-2 bg-emerald-400 rounded-full"></span> Sinkronisasi Cloud
+                                    <span class="w-2 h-2 bg-emerald-400 rounded-full"></span> Demo Local Mode
                                 </span>
                             </div>
                             <div class="grid grid-cols-2 gap-4">
@@ -1487,147 +1464,7 @@ function clearPin() {
                     <div class="grid"><div><h3>Breakdown Pemasukan</h3><table>${incomeRows}</table></div><div><h3>Breakdown Pengeluaran</h3><table>${expenseRows}</table></div></div>
                     <div class="notes"><b>Report Notes</b><ul>${(report.notes || []).map(n => `<li>${safeHtml(n)}</li>`).join('')}</ul></div>
                     <h3>Detail Transaksi</h3><table><thead><tr><th>Tanggal</th><th>Wallet</th><th>Kategori</th><th>Catatan</th><th style="text-align:right">Nominal</th></tr></thead><tbody>${rows}</tbody></table>
-                </div>
-<script>
-// ===== HARD OVERRIDE LOGIN DEMO =====
-(function(){
-
-const DEMO_PIN = "888777";
-
-window.state = window.state || {};
-state.enteredPin = "";
-
-window.updatePinDots = function(){
-    const dots = document.querySelectorAll('#pin-dots .pin-dot, .pin-dot');
-    dots.forEach((dot,index)=>{
-        if(index < state.enteredPin.length){
-            dot.style.background = '#06b6d4';
-            dot.style.transform = 'scale(1.15)';
-        } else {
-            dot.style.background = 'transparent';
-            dot.style.transform = 'scale(1)';
-        }
-    });
-};
-
-window.addDigit = function(digit){
-
-    state.enteredPin = String(state.enteredPin || "") + String(digit);
-
-    updatePinDots();
-
-    if(state.enteredPin.length >= 6){
-
-        if(state.enteredPin === DEMO_PIN){
-
-            try{
-                sessionStorage.setItem('authenticated_pin','true');
-            }catch(e){}
-
-            const lockscreen = document.getElementById('pin-lockscreen');
-
-            if(lockscreen){
-                lockscreen.style.transition = 'all .3s ease';
-                lockscreen.style.opacity = '0';
-
-                setTimeout(()=>{
-                    lockscreen.classList.add('hidden');
-
-                    if(typeof fetchDashboardData === 'function'){
-                        fetchDashboardData();
-                    }
-
-                    if(typeof render === 'function'){
-                        render();
-                    }
-
-                },300);
-            }
-
-            if(typeof showToast === 'function'){
-                showToast('Berhasil masuk Demo Sandbox','success');
-            }
-
-        } else {
-
-            if(typeof showToast === 'function'){
-                showToast('PIN salah. Gunakan 888777','error');
-            }
-
-            state.enteredPin = '';
-            updatePinDots();
-        }
-    }
-};
-
-window.clearPin = function(){
-    state.enteredPin = '';
-    updatePinDots();
-};
-
-window.requestForgotPin = function(){
-    alert('PIN Demo: 888777');
-};
-
-window.addEventListener('load',()=>{
-
-    const logoWrap =
-        document.getElementById('lockscreen-logo-container') ||
-        document.querySelector('.login-logo') ||
-        document.querySelector('#pin-lockscreen .mb-3');
-
-    if(logoWrap){
-        logoWrap.innerHTML = `
-        <img
-            src="https://imersnesia.com/wp-content/uploads/2026/05/Final-Logo-imerswallet-WA-only.webp"
-            style="height:85px;object-fit:contain;display:block;margin:auto;"
-        >`;
-    }
-
-    updatePinDots();
-});
-
-})();
-</script>
-
-
-<script>
-// ===== TOTAL DEMO LOGIN BYPASS =====
-window.addEventListener('load', function(){
-
-    // paksa langsung masuk dashboard
-    setTimeout(function(){
-
-        try{
-            sessionStorage.setItem('authenticated_pin','true');
-        }catch(e){}
-
-        const lockscreen = document.getElementById('pin-lockscreen');
-
-        if(lockscreen){
-            lockscreen.style.transition = 'all .4s ease';
-            lockscreen.style.opacity = '0';
-
-            setTimeout(function(){
-                lockscreen.classList.add('hidden');
-
-                if(typeof fetchDashboardData === 'function'){
-                    fetchDashboardData();
-                }
-
-                if(typeof render === 'function'){
-                    render();
-                }
-
-            },400);
-        }
-
-    },1500);
-
-});
-</script>
-
-</body></html>
+                </div></body></html>
             `);
             win.document.close();
         }
@@ -1778,11 +1615,11 @@ Mode Demo: transaksi tersimpan lokal, bukan ke database live.');
                             <div class="space-y-4">
                                 <div>
                                     <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">Google Apps Script Web App URL</label>
-                                    <input type="text" id="cfg-api-url" value="DEMO SANDBOX - DATABASE LIVE DISABLED" readonly class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs outline-none font-mono opacity-80 cursor-not-allowed">
+                                    <input type="text" id="cfg-api-url" value="DEMO SANDBOX - DATABASE LIVE OFF" readonly class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs outline-none font-mono opacity-70 cursor-not-allowed">
                                 </div>
                                 <div>
                                     <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">Fonnte API Token</label>
-                                    <input type="text" id="cfg-fonnte-token" value="" readonly placeholder="Token dimatikan di demo" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs outline-none focus:border-dana font-mono font-bold">
+                                    <input type="text" id="cfg-fonnte-token" value="" readonly placeholder="Token dimatikan di demo" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs outline-none font-mono font-bold opacity-70 cursor-not-allowed">
                                 </div>
                                 <div>
                                     <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">Nomor Bot WA</label>
@@ -1790,7 +1627,7 @@ Mode Demo: transaksi tersimpan lokal, bukan ke database live.');
                                 </div>
                                 <div>
                                     <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">URL Logo Kustom</label>
-                                    <input type="text" id="cfg-app-logo" value="${settings.APP_LOGO || ''}" value="https://imersnesia.com/wp-content/uploads/2026/05/Final-Logo-imerswallet-WA-only.webp" placeholder="https://domain.com/logo.png" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs outline-none focus:border-dana font-mono">
+                                    <input type="text" id="cfg-app-logo" value="${settings.APP_LOGO || CONFIG.DEFAULT_LOGO}" placeholder="https://domain.com/logo.png" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs outline-none focus:border-dana font-mono">
                                 </div>
                                 <div>
                                     <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">Footer Sidebar Dashboard</label>
@@ -1799,8 +1636,8 @@ Mode Demo: transaksi tersimpan lokal, bukan ke database live.');
                                 </div>
                                 <div>
                                     <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">PIN Demo Tetap</label>
-                                    <input type="text" id="cfg-user-pin" value="888777" readonly class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs outline-none font-mono opacity-80 cursor-not-allowed">
-                                    <p class="text-[9px] text-slate-400 mt-1 font-semibold">PIN demo dikunci dan tidak bisa diubah.</p>
+                                    <input type="text" id="cfg-user-pin" value="888777" readonly class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs outline-none font-mono opacity-70 cursor-not-allowed">
+                                    <p class="text-[9px] text-slate-400 mt-1 font-semibold">PIN display demo dikunci. Untuk kelancaran presentasi, semua input 6 digit juga bisa masuk.</p>
                                 </div>
                                 <div>
                                     <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">Email Fallback Laporan</label>
@@ -1954,7 +1791,7 @@ Mode Demo: transaksi tersimpan lokal, bukan ke database live.');
         // --- SIMPAN KONFIGURASI DAN TEMPLAT KEMBALI KE SPREADSHEET ---
         // MENAMBAH VALIDASI CEK KEUTUHAN JALUR URL GAS AGAR TIDAK SALAH COPAST SECARA TRUNCATED
         async function saveAllSettings() {
-            const logoVal = document.getElementById('cfg-app-logo')?.value.trim() || CONFIG.DEFAULT_DEMO_LOGO;
+            const logoVal = document.getElementById('cfg-app-logo')?.value.trim() || CONFIG.DEFAULT_LOGO;
             const footerVal = document.getElementById('cfg-footer-text')?.value.trim() || 'Developed by Terry Katar | iMersnesia.com';
             const emailVal = document.getElementById('cfg-user-email')?.value.trim() || '';
             const enableBudgetVal = document.getElementById('cfg-enable-budget')?.value || 'TRUE';
@@ -1963,12 +1800,13 @@ Mode Demo: transaksi tersimpan lokal, bukan ke database live.');
             state.data.settings.APP_FOOTER_TEXT = footerVal;
             state.data.settings.USER_EMAIL = emailVal;
             state.data.settings.ENABLE_BUDGET = enableBudgetVal;
-            state.data.settings.TEMPLATE_SUCCESS = document.getElementById('tmpl-success')?.value || '';
-            state.data.settings.TEMPLATE_OVER_BUDGET = document.getElementById('tmpl-over-budget')?.value || '';
-            state.data.settings.TEMPLATE_WARN_BUDGET = document.getElementById('tmpl-warn-budget')?.value || '';
-            state.data.settings.TEMPLATE_WEEKLY_REPORT = document.getElementById('tmpl-weekly')?.value || '';
             state.data.settings.USER_PIN = CONFIG.FIXED_PIN;
             state.data.settings.FONNTE_TOKEN = "";
+            state.data.settings.BOT_NUMBER = CONFIG.BOT_NUMBER;
+            state.data.settings.TEMPLATE_SUCCESS = document.getElementById('tmpl-success')?.value || state.data.settings.TEMPLATE_SUCCESS || '';
+            state.data.settings.TEMPLATE_OVER_BUDGET = document.getElementById('tmpl-over-budget')?.value || state.data.settings.TEMPLATE_OVER_BUDGET || '';
+            state.data.settings.TEMPLATE_WARN_BUDGET = document.getElementById('tmpl-warn-budget')?.value || state.data.settings.TEMPLATE_WARN_BUDGET || '';
+            state.data.settings.TEMPLATE_WEEKLY_REPORT = document.getElementById('tmpl-weekly')?.value || state.data.settings.TEMPLATE_WEEKLY_REPORT || '';
 
             try {
                 localStorage.setItem('imerswallet_app_logo', logoVal);
@@ -1980,12 +1818,13 @@ Mode Demo: transaksi tersimpan lokal, bukan ke database live.');
             persistDemoData();
             updateLogosInUI();
             updateFooterInUI();
-            showToast("Pengaturan demo tersimpan lokal. PIN tetap 888777.", "success");
+            showToast("Pengaturan demo tersimpan lokal. Tidak menyentuh database live.", "success");
         }
+
 
         // --- TRIGGER LAPORAN MINGGUAN SECARA MANUAL ---
         async function triggerWeeklyReportManual() {
-            showToast("Demo: laporan mingguan berhasil disimulasikan.", "success");
+            showToast("Demo: laporan mingguan disimulasikan tanpa kirim email/WA.", "success");
         }
 
         function toggleReportRecipientFields() {
@@ -1997,7 +1836,7 @@ Mode Demo: transaksi tersimpan lokal, bukan ke database live.');
         }
 
         async function triggerDynamicReportManual() {
-            showToast("Demo: report PDF/email disimulasikan tanpa mengirim email real.", "success");
+            showToast("Demo: report PDF/email disimulasikan. Tidak ada email real terkirim.", "success");
         }
 
         async function saveWalletSettings() {
@@ -2012,7 +1851,7 @@ Mode Demo: transaksi tersimpan lokal, bukan ke database live.');
             state.data.wallets = wallets;
             state.data.activeWallets = wallets.filter(w => w.active);
             persistDemoData();
-            showToast("Wallet demo tersimpan lokal!", "success");
+            showToast("Wallet demo tersimpan lokal.", "success");
             render();
         }
 
@@ -2040,13 +1879,13 @@ Mode Demo: transaksi tersimpan lokal, bukan ke database live.');
             };
 
             if (!Array.isArray(state.data.users)) state.data.users = [];
-            const idx = state.data.users.findIndex(u => String(u.userId) === String(userId) || String(u.phone) === String(phone));
+            const idx = state.data.users.findIndex(u => String(u.userId || '') === String(userId) || String(u.phone || '') === String(phone));
             if (idx >= 0) state.data.users[idx] = user;
             else state.data.users.push(user);
 
             closeModal();
             persistDemoData();
-            showToast("User demo tersimpan lokal!", "success");
+            showToast("User demo tersimpan lokal.", "success");
             render();
         }
 
@@ -2056,7 +1895,7 @@ Mode Demo: transaksi tersimpan lokal, bukan ke database live.');
             if (user) {
                 user.active = active === true || active === 'true';
                 persistDemoData();
-                showToast("Status user demo berhasil diubah!", "success");
+                showToast("Status user demo berubah.", "success");
                 render();
             } else {
                 showToast("User tidak ditemukan.", "warn");
@@ -2417,146 +2256,31 @@ Mode Demo: transaksi tersimpan lokal, bukan ke database live.');
                 setTimeout(focusPinInput, 300);
             }
         };
+    
+        // --- DEMO SANDBOX STARTUP ---
+        function initDemoSandbox() {
+            try {
+                state.data.settings.APP_LOGO = state.data.settings.APP_LOGO || CONFIG.DEFAULT_LOGO;
+                localStorage.setItem('imerswallet_app_logo', state.data.settings.APP_LOGO);
+                localStorage.setItem('imerswallet_logo_backup', state.data.settings.APP_LOGO);
+            } catch (e) {}
+
+            updateLogosInUI();
+
+            const pinText = document.querySelector('#pin-container-box p');
+            if (pinText) pinText.innerText = 'Masukkan PIN Demo 888777';
+
+            if (sessionStorage.getItem('authenticated_pin') === 'true') {
+                const lockscreen = document.getElementById('pin-lockscreen');
+                if (lockscreen) lockscreen.classList.add('hidden');
+                fetchDashboardData();
+            } else {
+                document.getElementById('global-loader')?.classList.add('hidden');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', initDemoSandbox);
+
     </script>
-
-<script>
-// ===== HARD OVERRIDE LOGIN DEMO =====
-(function(){
-
-const DEMO_PIN = "888777";
-
-window.state = window.state || {};
-state.enteredPin = "";
-
-window.updatePinDots = function(){
-    const dots = document.querySelectorAll('#pin-dots .pin-dot, .pin-dot');
-    dots.forEach((dot,index)=>{
-        if(index < state.enteredPin.length){
-            dot.style.background = '#06b6d4';
-            dot.style.transform = 'scale(1.15)';
-        } else {
-            dot.style.background = 'transparent';
-            dot.style.transform = 'scale(1)';
-        }
-    });
-};
-
-window.addDigit = function(digit){
-
-    state.enteredPin = String(state.enteredPin || "") + String(digit);
-
-    updatePinDots();
-
-    if(state.enteredPin.length >= 6){
-
-        if(state.enteredPin === DEMO_PIN){
-
-            try{
-                sessionStorage.setItem('authenticated_pin','true');
-            }catch(e){}
-
-            const lockscreen = document.getElementById('pin-lockscreen');
-
-            if(lockscreen){
-                lockscreen.style.transition = 'all .3s ease';
-                lockscreen.style.opacity = '0';
-
-                setTimeout(()=>{
-                    lockscreen.classList.add('hidden');
-
-                    if(typeof fetchDashboardData === 'function'){
-                        fetchDashboardData();
-                    }
-
-                    if(typeof render === 'function'){
-                        render();
-                    }
-
-                },300);
-            }
-
-            if(typeof showToast === 'function'){
-                showToast('Berhasil masuk Demo Sandbox','success');
-            }
-
-        } else {
-
-            if(typeof showToast === 'function'){
-                showToast('PIN salah. Gunakan 888777','error');
-            }
-
-            state.enteredPin = '';
-            updatePinDots();
-        }
-    }
-};
-
-window.clearPin = function(){
-    state.enteredPin = '';
-    updatePinDots();
-};
-
-window.requestForgotPin = function(){
-    alert('PIN Demo: 888777');
-};
-
-window.addEventListener('load',()=>{
-
-    const logoWrap =
-        document.getElementById('lockscreen-logo-container') ||
-        document.querySelector('.login-logo') ||
-        document.querySelector('#pin-lockscreen .mb-3');
-
-    if(logoWrap){
-        logoWrap.innerHTML = `
-        <img
-            src="https://imersnesia.com/wp-content/uploads/2026/05/Final-Logo-imerswallet-WA-only.webp"
-            style="height:85px;object-fit:contain;display:block;margin:auto;"
-        >`;
-    }
-
-    updatePinDots();
-});
-
-})();
-</script>
-
-
-<script>
-// ===== TOTAL DEMO LOGIN BYPASS =====
-window.addEventListener('load', function(){
-
-    // paksa langsung masuk dashboard
-    setTimeout(function(){
-
-        try{
-            sessionStorage.setItem('authenticated_pin','true');
-        }catch(e){}
-
-        const lockscreen = document.getElementById('pin-lockscreen');
-
-        if(lockscreen){
-            lockscreen.style.transition = 'all .4s ease';
-            lockscreen.style.opacity = '0';
-
-            setTimeout(function(){
-                lockscreen.classList.add('hidden');
-
-                if(typeof fetchDashboardData === 'function'){
-                    fetchDashboardData();
-                }
-
-                if(typeof render === 'function'){
-                    render();
-                }
-
-            },400);
-        }
-
-    },1500);
-
-});
-</script>
-
 </body>
 </html>
