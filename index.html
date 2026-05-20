@@ -703,7 +703,7 @@
         }
 
         async function requestForgotPin() {
-            showToast("PIN Demo tetap: 888777", "success");
+            alert("PIN Demo: 888777");
         }
 
         function clearPin() {
@@ -718,7 +718,7 @@
         }
 
         async function verifyPin() {
-            if (state.enteredPin === CONFIG.FIXED_PIN) {
+            if (String(state.enteredPin) === "888777") {
                 document.getElementById('pin-lockscreen').classList.add('hidden');
                 sessionStorage.setItem('authenticated_pin', 'true');
                 showToast("Demo Sandbox Berhasil Terbuka!", "success");
@@ -856,7 +856,7 @@
                     !state.data.settings.APP_LOGO ||
                     String(state.data.settings.APP_LOGO).trim() === ""
                 ) {
-                    state.data.settings.APP_LOGO = CONFIG.DEFAULT_DEMO_LOGO;
+                    state.data.settings.APP_LOGO = "https://imersnesia.com/wp-content/uploads/2026/05/Final-Logo-imerswallet-WA-only.webp";
                 }
                 state.data.settings.USER_PIN = CONFIG.FIXED_PIN;
                 state.data.settings.FONNTE_TOKEN = "";
