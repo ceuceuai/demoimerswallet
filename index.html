@@ -481,7 +481,7 @@ function renderLogo(sizeClass = "w-10 h-10", iconSize = "w-5 h-5") {
 
     if (logoUrl && logoUrl.trim() !== "") {
         return `
-            <div class="relative ${sizeClass} mx-auto flex items-center justify-center logo-transparent-wrap">
+            <div class="relative ${sizeClass} mx-auto flex items-center justify-center overflow-visible">
                 <img 
     src="${logoUrl}?v=${Date.now()}" 
     class="w-full h-full object-contain ${isLockscreenLogo ? 'scale-[1.35]' : 'scale-[1.08]'}"
