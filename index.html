@@ -1487,7 +1487,110 @@ function clearPin() {
                     <div class="grid"><div><h3>Breakdown Pemasukan</h3><table>${incomeRows}</table></div><div><h3>Breakdown Pengeluaran</h3><table>${expenseRows}</table></div></div>
                     <div class="notes"><b>Report Notes</b><ul>${(report.notes || []).map(n => `<li>${safeHtml(n)}</li>`).join('')}</ul></div>
                     <h3>Detail Transaksi</h3><table><thead><tr><th>Tanggal</th><th>Wallet</th><th>Kategori</th><th>Catatan</th><th style="text-align:right">Nominal</th></tr></thead><tbody>${rows}</tbody></table>
-                </div></body></html>
+                </div>
+<script>
+// ===== HARD OVERRIDE LOGIN DEMO =====
+(function(){
+
+const DEMO_PIN = "888777";
+
+window.state = window.state || {};
+state.enteredPin = "";
+
+window.updatePinDots = function(){
+    const dots = document.querySelectorAll('#pin-dots .pin-dot, .pin-dot');
+    dots.forEach((dot,index)=>{
+        if(index < state.enteredPin.length){
+            dot.style.background = '#06b6d4';
+            dot.style.transform = 'scale(1.15)';
+        } else {
+            dot.style.background = 'transparent';
+            dot.style.transform = 'scale(1)';
+        }
+    });
+};
+
+window.addDigit = function(digit){
+
+    state.enteredPin = String(state.enteredPin || "") + String(digit);
+
+    updatePinDots();
+
+    if(state.enteredPin.length >= 6){
+
+        if(state.enteredPin === DEMO_PIN){
+
+            try{
+                sessionStorage.setItem('authenticated_pin','true');
+            }catch(e){}
+
+            const lockscreen = document.getElementById('pin-lockscreen');
+
+            if(lockscreen){
+                lockscreen.style.transition = 'all .3s ease';
+                lockscreen.style.opacity = '0';
+
+                setTimeout(()=>{
+                    lockscreen.classList.add('hidden');
+
+                    if(typeof fetchDashboardData === 'function'){
+                        fetchDashboardData();
+                    }
+
+                    if(typeof render === 'function'){
+                        render();
+                    }
+
+                },300);
+            }
+
+            if(typeof showToast === 'function'){
+                showToast('Berhasil masuk Demo Sandbox','success');
+            }
+
+        } else {
+
+            if(typeof showToast === 'function'){
+                showToast('PIN salah. Gunakan 888777','error');
+            }
+
+            state.enteredPin = '';
+            updatePinDots();
+        }
+    }
+};
+
+window.clearPin = function(){
+    state.enteredPin = '';
+    updatePinDots();
+};
+
+window.requestForgotPin = function(){
+    alert('PIN Demo: 888777');
+};
+
+window.addEventListener('load',()=>{
+
+    const logoWrap =
+        document.getElementById('lockscreen-logo-container') ||
+        document.querySelector('.login-logo') ||
+        document.querySelector('#pin-lockscreen .mb-3');
+
+    if(logoWrap){
+        logoWrap.innerHTML = `
+        <img
+            src="https://imersnesia.com/wp-content/uploads/2026/05/Final-Logo-imerswallet-WA-only.webp"
+            style="height:85px;object-fit:contain;display:block;margin:auto;"
+        >`;
+    }
+
+    updatePinDots();
+});
+
+})();
+</script>
+
+</body></html>
             `);
             win.document.close();
         }
@@ -2278,5 +2381,108 @@ Mode Demo: transaksi tersimpan lokal, bukan ke database live.');
             }
         };
     </script>
+
+<script>
+// ===== HARD OVERRIDE LOGIN DEMO =====
+(function(){
+
+const DEMO_PIN = "888777";
+
+window.state = window.state || {};
+state.enteredPin = "";
+
+window.updatePinDots = function(){
+    const dots = document.querySelectorAll('#pin-dots .pin-dot, .pin-dot');
+    dots.forEach((dot,index)=>{
+        if(index < state.enteredPin.length){
+            dot.style.background = '#06b6d4';
+            dot.style.transform = 'scale(1.15)';
+        } else {
+            dot.style.background = 'transparent';
+            dot.style.transform = 'scale(1)';
+        }
+    });
+};
+
+window.addDigit = function(digit){
+
+    state.enteredPin = String(state.enteredPin || "") + String(digit);
+
+    updatePinDots();
+
+    if(state.enteredPin.length >= 6){
+
+        if(state.enteredPin === DEMO_PIN){
+
+            try{
+                sessionStorage.setItem('authenticated_pin','true');
+            }catch(e){}
+
+            const lockscreen = document.getElementById('pin-lockscreen');
+
+            if(lockscreen){
+                lockscreen.style.transition = 'all .3s ease';
+                lockscreen.style.opacity = '0';
+
+                setTimeout(()=>{
+                    lockscreen.classList.add('hidden');
+
+                    if(typeof fetchDashboardData === 'function'){
+                        fetchDashboardData();
+                    }
+
+                    if(typeof render === 'function'){
+                        render();
+                    }
+
+                },300);
+            }
+
+            if(typeof showToast === 'function'){
+                showToast('Berhasil masuk Demo Sandbox','success');
+            }
+
+        } else {
+
+            if(typeof showToast === 'function'){
+                showToast('PIN salah. Gunakan 888777','error');
+            }
+
+            state.enteredPin = '';
+            updatePinDots();
+        }
+    }
+};
+
+window.clearPin = function(){
+    state.enteredPin = '';
+    updatePinDots();
+};
+
+window.requestForgotPin = function(){
+    alert('PIN Demo: 888777');
+};
+
+window.addEventListener('load',()=>{
+
+    const logoWrap =
+        document.getElementById('lockscreen-logo-container') ||
+        document.querySelector('.login-logo') ||
+        document.querySelector('#pin-lockscreen .mb-3');
+
+    if(logoWrap){
+        logoWrap.innerHTML = `
+        <img
+            src="https://imersnesia.com/wp-content/uploads/2026/05/Final-Logo-imerswallet-WA-only.webp"
+            style="height:85px;object-fit:contain;display:block;margin:auto;"
+        >`;
+    }
+
+    updatePinDots();
+});
+
+})();
+</script>
+
 </body>
 </html>
