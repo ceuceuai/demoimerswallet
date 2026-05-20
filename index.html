@@ -365,14 +365,7 @@
 
         let state = {
             view: 'home',
-            data: {
-    settings: {},
-    transactions: [],
-    wallets: [],
-    users: [],
-    stats: {},
-    budgets: {},
-},
+            data: JSON.parse(JSON.stringify(DUMMY_DATA)),
             isUsingDemo: false,
             subTab: 'daily', // Sub-tabs: daily, calendar, yearly, budget
             isLoading: false,
