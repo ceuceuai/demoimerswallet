@@ -660,22 +660,33 @@
         }
 
         // --- FETCH DENGAN TIMEOUT HELPER ---
-        async function fetchWithTimeout(resource, options = {}) {
-            const { timeout = 15000 } = options;
-            const controller = new AbortController();
-            const id = setTimeout(() => controller.abort(), timeout);
-            try {
-                const response = await fetch(resource, {
-                    ...options,
-                    signal: controller.signal  
-                });
-                clearTimeout(id);
-                return response;
-            } catch (err) {
-                clearTimeout(id);
-                throw err;
+        async function loadDashboard() {
+    try {
+        const response = await fetchWithTimeout(
+            `${CONFIG.API_URL}?action=getDashboard`,
+            {
+                timeout: 15000
             }
+        );
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
         }
+
+        const data = await response.json();
+
+        console.log(data);
+
+    } catch (error) {
+
+        if (error.name === "AbortError") {
+            console.error("Request timeout");
+        } else {
+            console.error("Fetch error:", error);
+        }
+
+    }
+}
 
         // --- PRELOAD BRANDING SEBELUM PIN ---
         function applyBrandingSettings(settings = {}) {
@@ -719,9 +730,7 @@
             try {
                 // 1. Ambil & pulihkan Google Apps Script Web App URL kustom dari localStorage agar tidak reset ke default
                 const cachedApiUrl = localStorage.getItem('imerswallet_api_url');
-                if (cachedApiUrl && cachedApiUrl.startsWith("https://script.google.com/") && cachedApiUrl.includes("/exec")) {
-                    CONFIG.API_URL = cachedApiUrl;
-                }
+                if (cachedApiUrl && cachedApiUrl.includes("script.google")) {
 
                 // 2. Ambil branding cache lainnya
                 const cachedLogo = localStorage.getItem('imerswallet_app_logo');
