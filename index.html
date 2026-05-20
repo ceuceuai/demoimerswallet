@@ -14,211 +14,67 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
-        :root {
-            --dana-blue: #18b8c8;
-            --dana-dark: #0b7f93;
-            --dana-light: #edf4fb;
-            --paper: #eef4fb;
-            --paper-2: #f6f9fd;
-            --ink: #102033;
-            --muted: #728198;
-            --teal: #15c8b8;
-            --cyan: #3ed6f2;
-            --violet: #7a67ff;
-            --gold: #f3b431;
+        :root { 
+            --dana-blue: #108EE9; 
+            --dana-dark: #0B5ED7;
+            --dana-light: #F5F9FF;
             --emerald: #10B981;
             --rose: #F43F5E;
-            --radius-xl: 32px;
-            --neu-light: rgba(255, 255, 255, .92);
-            --neu-dark: rgba(125, 149, 174, .32);
-            --neu-shadow: 18px 18px 42px rgba(132, 154, 181, .30), -18px -18px 42px rgba(255,255,255,.94);
-            --neu-soft: 10px 10px 24px rgba(132,154,181,.22), -10px -10px 24px rgba(255,255,255,.9);
-            --neu-inset: inset 8px 8px 18px rgba(132,154,181,.22), inset -8px -8px 18px rgba(255,255,255,.92);
         }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--dana-light); 
+            color: #1E293B; 
+        }
+        .bg-dana { background-color: var(--dana-blue); }
+        .bg-dana-dark { background-color: var(--dana-dark); }
+        .text-dana { color: var(--dana-blue); }
+        
+        /* Bayangan Kartu Premium ala Fintech */
+        .card-shadow { 
+            box-shadow: 0 20px 35px -5px rgba(16, 142, 233, 0.05), 0 10px 15px -5px rgba(16, 142, 233, 0.02); 
+        }
+        .bottom-nav { 
+            box-shadow: 0 -5px 30px rgba(16, 142, 233, 0.08); 
+        }
+        
+        /* Animasi Transisi Halaman */
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        .animate-fade { animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        
+        /* Animasi Getar untuk PIN Salah */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        .animate-shake { animation: shake 0.2s ease-in-out 2; }
 
-        * { -webkit-tap-highlight-color: transparent; }
-        html { scroll-behavior: smooth; }
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background:
-                radial-gradient(circle at 8% 0%, rgba(255,255,255,.98) 0, rgba(255,255,255,.0) 34%),
-                radial-gradient(circle at 90% 12%, rgba(87,112,255,.12) 0, rgba(87,112,255,0) 28%),
-                radial-gradient(circle at 70% 78%, rgba(21,200,184,.13) 0, rgba(21,200,184,0) 34%),
-                linear-gradient(145deg, #f7fbff 0%, #edf4fb 45%, #e8f0f8 100%);
-            color: var(--ink);
+        /* Logo transparan: hilangkan background/card putih bawaan saat image dimuat dari URL */
+        .logo-transparent-wrap {
+            background: transparent !important;
+            box-shadow: none !important;
+            border: 0 !important;
+            overflow: visible !important;
         }
-        body::before {
-            content: "";
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: -1;
-            background:
-                linear-gradient(135deg, rgba(255,255,255,.48), rgba(255,255,255,0) 36%),
-                repeating-linear-gradient(135deg, rgba(31,53,83,.025) 0 1px, transparent 1px 14px);
-            opacity: .75;
+        .logo-transparent-img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: transparent !important;
+            border: 0 !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
         }
-
-        .bg-dana { background: linear-gradient(145deg, #35d5cf, #12aabf) !important; }
-        .bg-dana-dark { background: linear-gradient(145deg, #1294a9, #07778c) !important; }
-        .text-dana { color: var(--dana-blue) !important; }
-        .border-dana { border-color: var(--dana-blue) !important; }
-        .focus\:border-dana:focus { border-color: rgba(24,184,200,.75) !important; box-shadow: var(--neu-inset), 0 0 0 3px rgba(24,184,200,.10) !important; }
-
-        .card-shadow {
-            border: 1px solid rgba(255,255,255,.78) !important;
-            background: linear-gradient(145deg, rgba(255,255,255,.72), rgba(232,240,248,.72)) !important;
-            box-shadow: var(--neu-shadow) !important;
-        }
-        .bottom-nav {
-            box-shadow: 0 -18px 36px rgba(132,154,181,.20), inset 0 1px 0 rgba(255,255,255,.88) !important;
-            background: rgba(240,246,252,.88) !important;
-            backdrop-filter: blur(18px);
-        }
-
-        aside {
-            background: linear-gradient(165deg, rgba(247,251,255,.95), rgba(230,239,248,.92)) !important;
-            border-right: 1px solid rgba(255,255,255,.72) !important;
-            box-shadow: 18px 0 42px rgba(132,154,181,.16), inset -1px 0 0 rgba(255,255,255,.65);
-        }
-        aside nav button,
-        #navbar button,
-        button,
-        a {
-            transition: transform .22s ease, box-shadow .22s ease, background .22s ease, color .22s ease, border-color .22s ease;
-        }
-        aside nav button:hover,
-        button:hover,
-        a:hover { transform: translateY(-1px); }
-        aside nav button.text-dana,
-        aside nav button[id^="side-"][class*="text-dana"] {
-            background: linear-gradient(145deg, #f8fbff, #e6f0f8) !important;
-            box-shadow: var(--neu-soft) !important;
-            color: var(--dana-blue) !important;
-            border: 1px solid rgba(255,255,255,.82);
-        }
-        aside nav button:not(.text-dana):hover {
-            background: rgba(255,255,255,.48) !important;
-            box-shadow: 8px 8px 18px rgba(132,154,181,.16), -8px -8px 18px rgba(255,255,255,.75);
-        }
-
-        input, select, textarea {
-            background: linear-gradient(145deg, #eef4fb, #f8fbff) !important;
-            border: 1px solid rgba(255,255,255,.78) !important;
-            box-shadow: var(--neu-inset) !important;
-            color: var(--ink) !important;
-        }
-        input::placeholder, textarea::placeholder { color: #97a5b7 !important; }
-
-        /* Deep neumorphism blocks */
-        .bg-white,
-        .bg-slate-50,
-        .bg-blue-50,
-        .bg-blue-50\/50,
-        .bg-blue-50\/70,
-        .bg-slate-50\/50,
-        .bg-emerald-50,
-        .bg-emerald-50\/60,
-        .bg-rose-50,
-        .bg-rose-50\/60,
-        .bg-purple-50,
-        .bg-amber-50,
-        .bg-cyan-50 {
-            background: linear-gradient(145deg, rgba(255,255,255,.72), rgba(230,239,248,.72)) !important;
-        }
-        .border-slate-100, .border-blue-100, .border-emerald-100, .border-rose-100, .border-slate-200 {
-            border-color: rgba(255,255,255,.72) !important;
-        }
-        .shadow-xs, .shadow-sm, .shadow-md, .shadow-lg, .shadow-xl, .shadow-2xl {
-            box-shadow: var(--neu-soft) !important;
-        }
-
-        /* Main dashboard hero: soft glossy teal card */
-        .bg-dana.rounded-\[36px\] {
-            background:
-                radial-gradient(circle at 12% 10%, rgba(255,255,255,.32), transparent 34%),
-                radial-gradient(circle at 86% 12%, rgba(126,105,255,.34), transparent 30%),
-                linear-gradient(145deg, #1bd4c4 0%, #11a8c5 42%, #116f98 100%) !important;
-            box-shadow: 20px 22px 48px rgba(93,131,160,.36), -18px -18px 40px rgba(255,255,255,.92), inset 1px 1px 0 rgba(255,255,255,.55), inset -8px -10px 24px rgba(0,58,85,.24) !important;
-            border: 1px solid rgba(255,255,255,.72) !important;
-        }
-        .bg-dana.rounded-\[36px\]::after {
-            content: "";
-            position: absolute;
-            inset: 1px;
-            border-radius: 35px;
-            background: linear-gradient(135deg, rgba(255,255,255,.28), rgba(255,255,255,0) 42%);
-            pointer-events: none;
-        }
-        .bg-dana.rounded-\[36px\] .bg-white\/10 {
-            background: rgba(255,255,255,.18) !important;
-            box-shadow: inset 4px 4px 12px rgba(0,74,96,.16), inset -4px -4px 12px rgba(255,255,255,.24) !important;
-            border: 1px solid rgba(255,255,255,.28) !important;
-        }
-
-        .rounded-\[40px\], .rounded-\[36px\], .rounded-\[32px\], .rounded-3xl, .rounded-\[28px\] {
-            box-shadow: var(--neu-shadow);
-        }
-
-        table thead tr { background: linear-gradient(145deg, #f8fbff, #e9f1f9) !important; }
-        table tbody tr:hover { background: rgba(255,255,255,.42) !important; }
-
-        #pin-lockscreen {
-            background:
-                radial-gradient(circle at 50% 0%, rgba(27,212,196,.18), transparent 30%),
-                radial-gradient(circle at 80% 75%, rgba(126,105,255,.15), transparent 34%),
-                linear-gradient(145deg, rgba(239,246,252,.96), rgba(222,234,246,.96)) !important;
-        }
-        #pin-container-box {
-            background: linear-gradient(145deg, rgba(255,255,255,.62), rgba(230,239,248,.62));
-            box-shadow: 22px 22px 54px rgba(72,95,120,.28), -22px -22px 54px rgba(255,255,255,.88), inset 1px 1px 0 rgba(255,255,255,.75);
-            border: 1px solid rgba(255,255,255,.78);
-            border-radius: 42px;
-            padding: 34px 26px;
-            backdrop-filter: blur(18px);
-        }
-        #pin-container-box h2 { color: var(--ink); text-shadow: 0 2px 0 rgba(255,255,255,.6); }
-        #pin-container-box p { color: var(--muted) !important; }
-        #pin-container-box .grid button {
-            background: linear-gradient(145deg, #f8fbff, #dfeaf5) !important;
-            color: var(--ink) !important;
-            border: 1px solid rgba(255,255,255,.74);
-            box-shadow: 10px 10px 24px rgba(132,154,181,.28), -10px -10px 24px rgba(255,255,255,.92) !important;
-        }
-        #pin-container-box .grid button:active {
-            box-shadow: var(--neu-inset) !important;
-            transform: scale(.98);
-        }
-        #pin-dots div { border-color: rgba(114,129,152,.42) !important; box-shadow: var(--neu-inset); }
-        #pin-dots div.bg-dana { box-shadow: 0 0 0 6px rgba(24,184,200,.10), var(--neu-soft) !important; }
-
-        #toast {
-            background: rgba(18,32,51,.92) !important;
-            border: 1px solid rgba(255,255,255,.14);
-            backdrop-filter: blur(18px);
-            box-shadow: 18px 18px 42px rgba(67,83,105,.28) !important;
-        }
-        #modal-overlay { background: rgba(54,71,91,.28) !important; backdrop-filter: blur(16px); }
-        #modal-box {
-            background: linear-gradient(145deg, rgba(255,255,255,.86), rgba(231,240,249,.88)) !important;
-            border: 1px solid rgba(255,255,255,.80);
-            box-shadow: 28px 28px 72px rgba(70,94,122,.32), -18px -18px 48px rgba(255,255,255,.8) !important;
-        }
-
-        .logo-transparent-wrap { background: transparent !important; box-shadow: none !important; border: 0 !important; overflow: visible !important; }
-        .logo-transparent-img { display:block; width:100%; height:100%; object-fit:contain; background:transparent!important; border:0!important; box-shadow:none!important; border-radius:0!important; }
-        #lockscreen-logo-container, #lockscreen-logo-container img { background:transparent!important; box-shadow:none!important; border:0!important; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(14px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
-        .animate-fade { animation: fadeIn .42s cubic-bezier(.16,1,.3,1) forwards; }
-        @keyframes shake { 0%,100%{transform:translateX(0)}25%{transform:translateX(-10px)}75%{transform:translateX(10px)} }
-        .animate-shake { animation: shake .2s ease-in-out 2; }
-
-        /* Fine tuning mobile */
-        @media (max-width: 768px) {
-            :root { --neu-shadow: 12px 12px 28px rgba(132,154,181,.25), -12px -12px 28px rgba(255,255,255,.88); }
-            #navbar { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
-            .rounded-\[40px\], .rounded-\[36px\] { border-radius: 28px !important; }
+        #lockscreen-logo-container,
+        #lockscreen-logo-container img {
+            background: transparent !important;
+            box-shadow: none !important;
+            border: 0 !important;
         }
     </style>
 </head>
@@ -412,64 +268,11 @@
     </div>
 
     <script>
-        // --- DATA DUMMY SEBAGAI CADANGAN JIKA OFFLINE ---
-        const DUMMY_DATA = {
-            stats: { 
-                balance: 5440000, 
-                income: 6200000, 
-                expense: 760000 
-            },
-            transactions: [
-                { date: "2026-05-01", type: "income", category: "Gaji", amount: 5000000, note: "Gaji Bulanan", wallet: "Pribadi" },
-                { date: "2026-05-02", type: "expense", category: "Makanan", amount: 85000, note: "Makan siang & kopi", wallet: "Pribadi" },
-                { date: "2026-05-03", type: "expense", category: "Transportasi", amount: 50000, note: "Bensin motor", wallet: "Pribadi" },
-                { date: "2026-05-05", type: "expense", category: "Tagihan", amount: 350000, note: "Bayar internet", wallet: "Pribadi" },
-                { date: "2026-05-07", type: "income", category: "Freelance", amount: 1200000, note: "Project desain web", wallet: "Bisnis" },
-                { date: "2026-05-09", type: "expense", category: "Belanja", amount: 275000, note: "Belanja dapur bulanan", wallet: "Pribadi" }
-            ],
-            budgets: {
-                "Makanan": 1000000,
-                "Transportasi": 500000,
-                "Tagihan": 1500000,
-                "Belanja": 2000000
-            },
-            settings: {
-                FONNTE_TOKEN: "",
-                BOT_NUMBER: "628123456789",
-                USER_EMAIL: "owner@example.com",
-                APP_LOGO: "", // Default kosong (akan fallback ke ikon Lucide Wallet)
-                TEMPLATE_SUCCESS: "✅ *Pencatatan Berhasil!*\n\n📂 *KANTONG: {wallet}*\n💰 *TIPE: {type}*\n📝 Kategori: {category}\n💬 Catatan: {note}\n💸 Nominal: *Rp{amount}*",
-                TEMPLATE_OVER_BUDGET: "⚠️ *WARNING BUDGET JEBOL!* ⚠️\n\nPengeluaran Anda pada kategori *{category}* telah melebihi batas anggaran bulanan!\n\n💸 Terpakai: *Rp{spent}*\n📊 Batas Anggaran: *Rp{limit}*",
-                TEMPLATE_WARN_BUDGET: "⚠️ *PERINGATAN HEMAT!* ⚠️\n\nPengeluaran kategori *{category}* sudah mencapai *{ratio}%* dari batas anggaran bulanan Anda.",
-                TEMPLATE_WEEKLY_REPORT: "📊 *LAPORAN MINGGUAN iMersWallet* 📊\n\n📈 Pemasukan: *Rp{income}*\n📉 Pengeluaran: *Rp{expense}*"
-            }
-        };
-
-
-        // --- EXTENSION DATA DINAMIS: USERS, WALLETS, BUDGET, FOOTER ---
-        DUMMY_DATA.wallets = [
-            { wallet: "Pribadi", active: true, label: "Kantong Pribadi", sort: 1, keywords: ["pribadi", "peribadi", "personal"] },
-            { wallet: "Bisnis", active: true, label: "Kas Bisnis / Usaha", sort: 2, keywords: ["bisnis", "usaha", "toko", "freelance", "kerja"] },
-            { wallet: "Tabungan", active: true, label: "Kantong Tabungan", sort: 3, keywords: ["tabungan", "nabung", "simpanan"] }
-        ];
-        DUMMY_DATA.activeWallets = DUMMY_DATA.wallets.filter(w => w.active);
-        DUMMY_DATA.budgetList = [
-            { phone: "628123456789", wallet: "Pribadi", category: "Makanan", monthlyLimit: 1000000, active: true },
-            { phone: "628123456789", wallet: "Pribadi", category: "Transportasi", monthlyLimit: 500000, active: true },
-            { phone: "628123456789", wallet: "Pribadi", category: "Tagihan", monthlyLimit: 1500000, active: true },
-            { phone: "628123456789", wallet: "Pribadi", category: "Belanja", monthlyLimit: 2000000, active: true }
-        ];
-        DUMMY_DATA.users = [
-            { userId: "USR-999", phone: "628123456789", name: "Terry Katar", role: "Admin", email: "owner@example.com", active: true, canChatBot: true, canReceiveReport: true, defaultWallet: "Pribadi" }
-        ];
-        DUMMY_DATA.reportRecipients = DUMMY_DATA.users.filter(u => u.canReceiveReport);
-        DUMMY_DATA.settings.ENABLE_BUDGET = "TRUE";
-        DUMMY_DATA.settings.APP_FOOTER_TEXT = "Developed by Terry Katar | iMersnesia.com";
 
         // --- KONFIGURASI REST API GOOGLE SHEETS (SINKRON TAUTAN TERBARU) ---
         const CONFIG = {
-            API_URL: "https://script.google.com/macros/s/AKfycbzhQyqs3uUyop5l_5sgwPg_0kyFUM2vfY9bnCiNetZW0dxeQrPT0VNrZ9GGBXG_6-djqQ/exec",
-            BOT_NUMBER: "628123456789"
+            API_URL: localStorage.getItem("imerswallet_api_url") || "https://script.google.com/macros/s/AKfycbzhQyqs3uUyop5l_5sgwPg_0kyFUM2vfY9bnCiNetZW0dxeQrPT0VNrZ9GGBXG_6-djqQ/exec",
+            BOT_NUMBER: localStorage.getItem("imerswallet_bot_number") || "628123456789"
         };
 
         // --- PEMETAAN IKON KATEGORI TRANSAKSI (Definisi Awal) ---
@@ -509,8 +312,20 @@
 
         let state = {
             view: 'home',
-            data: JSON.parse(JSON.stringify(DUMMY_DATA)),
-            isUsingDemo: true,
+            data: {
+                status: 'idle',
+                stats: { balance: 0, income: 0, expense: 0 },
+                transactions: [],
+                budgets: {},
+                budgetList: [],
+                settings: {},
+                wallets: [],
+                activeWallets: [],
+                users: [],
+                reportRecipients: [],
+                userName: ''
+            },
+            isUsingDemo: false,
             subTab: 'daily', // Sub-tabs: daily, calendar, yearly, budget
             isLoading: false,
             enteredPin: "",
@@ -530,7 +345,7 @@
         }
 
         function getAllWallets() {
-            return Array.isArray(state.data.wallets) && state.data.wallets.length ? state.data.wallets : (DUMMY_DATA.wallets || []);
+            return Array.isArray(state.data.wallets) ? state.data.wallets : [];
         }
 
         function getActiveWallets() {
@@ -606,16 +421,7 @@
             const logoUrl = state.data.settings.APP_LOGO || "";
             const isLockscreenLogo = sizeClass.includes("w-24") || sizeClass.includes("h-24") || sizeClass.includes("w-20") || sizeClass.includes("h-20");
 
-            if (
-                logoUrl &&
-                logoUrl.trim() !== "" &&
-                (
-                    logoUrl.startsWith("http") ||
-                    logoUrl.startsWith("data:image") ||
-                    logoUrl.startsWith("./") ||
-                    logoUrl.startsWith("/")
-                )
-            ) {
+            if (logoUrl && logoUrl.trim() !== "" && logoUrl.startsWith("http")) {
                 return `
                     <div class="relative ${sizeClass} mx-auto flex items-center justify-center logo-transparent-wrap">
                         <img 
@@ -709,7 +515,8 @@
                     throw new Error("Gagal");
                 }
             } catch (err) {
-                showToast("PIN keamanan terkirim ke WhatsApp Anda (123456)!", "success");
+                console.error("Gagal mengirim PIN:", err);
+                showToast("Gagal mengirim PIN. Cek Apps Script Logs.", "warn");
             }
         }
 
@@ -738,14 +545,9 @@
                     triggerPinShake();
                 }
             } catch (err) {
-                if (state.enteredPin === "123456") {
-                    document.getElementById('pin-lockscreen').classList.add('hidden');
-                    sessionStorage.setItem('authenticated_pin', 'true');
-                    showToast("Sesi Demo Berhasil Terbuka!", "success");
-                    fetchDashboardData();
-                } else {
-                    triggerPinShake();
-                }
+                console.error("Verifikasi PIN gagal:", err);
+                showToast("Server tidak merespon. Cek koneksi Apps Script.", "warn");
+                triggerPinShake();
             }
         }
 
@@ -798,24 +600,11 @@
         function applyBrandingSettings(settings = {}) {
             if (!settings) return;
 
-            if (settings.APP_LOGO !== undefined) {
-                const incomingLogo = String(settings.APP_LOGO || "").trim();
-
-                if (incomingLogo !== "") {
-                    state.data.settings.APP_LOGO = incomingLogo;
-
-                    try {
-                        localStorage.setItem('imerswallet_app_logo', incomingLogo);
-                        localStorage.setItem('imerswallet_logo_backup', incomingLogo);
-                    } catch (e) {}
-                } else {
-                    try {
-                        const backupLogo = localStorage.getItem('imerswallet_logo_backup');
-                        if (backupLogo) {
-                            state.data.settings.APP_LOGO = backupLogo;
-                        }
-                    } catch (e) {}
-                }
+            if (settings.APP_LOGO && String(settings.APP_LOGO).trim() !== "") {
+                state.data.settings.APP_LOGO = String(settings.APP_LOGO).trim();
+                try {
+                    localStorage.setItem('imerswallet_app_logo', state.data.settings.APP_LOGO);
+                } catch (e) {}
             }
 
             if (settings.BOT_NUMBER && String(settings.BOT_NUMBER).trim() !== "") {
@@ -841,7 +630,7 @@
 
         function hydrateCachedBranding() {
             try {
-                const cachedLogo = localStorage.getItem('imerswallet_app_logo') || localStorage.getItem('imerswallet_logo_backup');
+                const cachedLogo = localStorage.getItem('imerswallet_app_logo');
                 const cachedBotNumber = localStorage.getItem('imerswallet_bot_number');
 
                 if (cachedLogo) state.data.settings.APP_LOGO = cachedLogo;
@@ -865,11 +654,29 @@
                 const result = await response.json();
                 if (result && result.status === 'success') {
                     state.preloadedDashboard = result;
-                    applyBrandingSettings(result.settings || {});
+                    applyBrandingSettings(state.data.settings || {});
                 }
             } catch (err) {
                 console.warn("Branding lockscreen belum bisa dimuat dari cloud, memakai cache/default.", err);
             }
+        }
+
+
+
+        function normalizeDashboardData(result = {}) {
+            return {
+                ...result,
+                stats: result.stats || { balance: 0, income: 0, expense: 0 },
+                transactions: Array.isArray(result.transactions) ? result.transactions : [],
+                budgets: result.budgets || {},
+                budgetList: Array.isArray(result.budgetList) ? result.budgetList : [],
+                settings: result.settings || {},
+                wallets: Array.isArray(result.wallets) ? result.wallets : [],
+                activeWallets: Array.isArray(result.activeWallets) ? result.activeWallets : [],
+                users: Array.isArray(result.users) ? result.users : [],
+                reportRecipients: Array.isArray(result.reportRecipients) ? result.reportRecipients : [],
+                userName: result.userName || ''
+            };
         }
 
         // --- AMBIL DATA REAL-TIME DARI GOOGLE APPS SCRIPT ---
@@ -887,52 +694,17 @@
                 }
                 
                 if (result && result.status === 'success') {
-
-                    const cachedLogo =
-                        localStorage.getItem('imerswallet_app_logo') ||
-                        localStorage.getItem('imerswallet_logo_backup') ||
-                        '';
-
-                    const cachedFooter =
-                        localStorage.getItem('imerswallet_footer_text') || '';
-
-                    state.data = result;
+                    state.data = normalizeDashboardData(result);
                     state.isUsingDemo = false;
-
-                    if (!state.data.settings) {
-                        state.data.settings = {};
-                    }
-
-                    // FORCE restore logo kalau backend kosong
-                    if (
-                        !state.data.settings.APP_LOGO ||
-                        String(state.data.settings.APP_LOGO).trim() === ""
-                    ) {
-                        state.data.settings.APP_LOGO = cachedLogo;
-                    }
-
-                    // FORCE restore footer kalau backend kosong
-                    if (
-                        !state.data.settings.APP_FOOTER_TEXT ||
-                        String(state.data.settings.APP_FOOTER_TEXT).trim() === ""
-                    ) {
-                        state.data.settings.APP_FOOTER_TEXT = cachedFooter;
-                    }
-
-                    CONFIG.BOT_NUMBER =
-                        result.settings?.BOT_NUMBER || CONFIG.BOT_NUMBER;
-
+                    CONFIG.BOT_NUMBER = state.data.settings.BOT_NUMBER || CONFIG.BOT_NUMBER;
                     applyBrandingSettings(state.data.settings || {});
-                    updateLogosInUI();
-                    updateFooterInUI();
-
                     showToast("Pangkalan Data Sinkron Real-time!", "success");
                 } else {
                     throw new Error("Format tidak sesuai.");
                 }
             } catch (error) {
-                console.warn("Database cloud tidak merespon. Menggunakan data lokal.");
-                state.isUsingDemo = true;
+                console.error("Gagal sync dashboard:", error);
+                showToast("Gagal mengambil data dari server. Cek URL Apps Script / permission / JSON.", "warn");
             } finally {
                 state.isLoading = false;
                 document.getElementById('global-loader')?.classList.add('hidden');
@@ -955,7 +727,7 @@
                 return "Selamat Malam";
             };
 
-            const userName = state.isUsingDemo ? "Terry Katar" : (state.data.userName || "Terry Katar");
+            const userName = state.data.userName || "User";
             const greeting = getGreeting();
 
             const walletCards = activeWallets.map((w, idx) => {
@@ -1494,8 +1266,8 @@
                 else throw new Error(result?.message || 'Gagal generate report');
                 showToast('Wallet Report berhasil dibuat!', 'success');
             } catch (err) {
-                state.walletReport = buildLocalWalletReport(wallet, month, year);
-                showToast('Report dibuat dari data lokal dashboard.', 'warn');
+                console.error("Gagal generate wallet report:", err);
+                showToast('Gagal membuat report dari server. Cek Apps Script Logs.', 'warn');
             }
             render();
         }
@@ -1551,9 +1323,9 @@
                 <div class="max-w-5xl mx-auto p-4 lg:p-10 space-y-6 animate-fade pb-10">
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div>
-                            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">FALLBACK INPUT</p>
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">DASHBOARD INPUT</p>
                             <h2 class="text-2xl font-black text-slate-900">Wallet Chat</h2>
-                            <p class="text-sm text-slate-500 font-semibold mt-1">Input transaksi lewat dashboard saat bot WhatsApp error.</p>
+                            <p class="text-sm text-slate-500 font-semibold mt-1">Input transaksi langsung ke backend Google Sheet lewat dashboard.</p>
                         </div>
                         <button onclick="fetchDashboardData()" class="px-4 py-3 bg-white border border-slate-100 text-slate-600 rounded-2xl text-xs font-bold flex items-center gap-2 card-shadow"><i data-lucide="rotate-cw" class="w-4 h-4"></i> Sync</button>
                     </div>
@@ -1562,7 +1334,7 @@
                         <div class="bg-emerald-500 text-white p-5 flex items-center justify-between">
                             <div class="flex items-center gap-3">
                                 <div class="w-11 h-11 rounded-2xl bg-white/20 flex items-center justify-center"><i data-lucide="bot" class="w-6 h-6"></i></div>
-                                <div><h3 class="font-black">iMersWallet Assistant</h3><p class="text-xs font-bold opacity-80">Dashboard chat fallback</p></div>
+                                <div><h3 class="font-black">iMersWallet Assistant</h3><p class="text-xs font-bold opacity-80">Dashboard chat live</p></div>
                             </div>
                             <span class="px-3 py-1 bg-white/20 rounded-xl text-xs font-black">Online</span>
                         </div>
@@ -1645,14 +1417,8 @@
                 if (data.result.transaction) await fetchDashboardData();
                 else render();
             } catch (err) {
-                const local = localWalletChatParser(message);
-                if (local.transaction) {
-                    state.data.transactions.push(local.transaction);
-                    const inc = state.data.transactions.filter(t => t.type === 'income').reduce((a, b) => a + Number(b.amount || 0), 0);
-                    const exp = state.data.transactions.filter(t => t.type === 'expense').reduce((a, b) => a + Number(b.amount || 0), 0);
-                    state.data.stats = { balance: inc - exp, income: inc, expense: exp };
-                }
-                pushWalletChatMessage('bot', local.reply + '\n\nCatatan: backend belum merespon, jadi ini fallback lokal dashboard.');
+                console.error("Wallet Chat gagal:", err);
+                pushWalletChatMessage('bot', 'Backend belum merespon. Transaksi tidak disimpan. Cek Apps Script Logs lalu coba lagi.');
                 render();
             }
             setTimeout(() => {
@@ -1883,6 +1649,7 @@
                     return showToast("URL Apps Script tidak valid! Pastikan diakhiri dengan /exec", "warn");
                 }
                 CONFIG.API_URL = apiVal;
+                localStorage.setItem("imerswallet_api_url", apiVal);
             }
 
             const queryParams = new URLSearchParams({
@@ -1901,24 +1668,7 @@
                 template_weekly_report: tmplWeekly
             });
 
-            
-            try {
-                localStorage.setItem('imerswallet_app_logo', logoVal);
-                localStorage.setItem('imerswallet_logo_backup', logoVal);
-                localStorage.setItem('imerswallet_footer_text', footerVal);
-                localStorage.setItem('imerswallet_bot_number', botVal);
-
-                state.data.settings.APP_LOGO = logoVal;
-                state.data.settings.APP_FOOTER_TEXT = footerVal;
-                CONFIG.BOT_NUMBER = botVal;
-
-                updateLogosInUI();
-                updateFooterInUI();
-            } catch (e) {
-                console.log('Local save gagal', e);
-            }
-
-showToast("Menyimpan Pengaturan Ke Google Sheet...", "success");
+            showToast("Menyimpan Pengaturan Ke Google Sheet...", "success");
 
             try {
                 const response = await fetchWithTimeout(`${CONFIG.API_URL}?${queryParams.toString()}`, { timeout: 15000 });
@@ -1938,7 +1688,7 @@ showToast("Menyimpan Pengaturan Ke Google Sheet...", "success");
                 state.data.settings.ENABLE_BUDGET = enableBudgetVal;
                 updateLogosInUI();
                 updateFooterInUI();
-                showToast("Simpan gagal (Sandbox Offline Mode)", "warn");
+                showToast("Simpan gagal. Cek Apps Script Logs / permission.", "warn");
             }
         }
 
@@ -2239,7 +1989,7 @@ showToast("Menyimpan Pengaturan Ke Google Sheet...", "success");
                             <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">Catatan</label>
                             <input type="text" id="tx-note" placeholder="Contoh: Kopi pagi" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm outline-none focus:border-dana">
                         </div>
-                        <button onclick="submitManualTransaction()" class="w-full py-4 bg-dana hover:bg-dana-dark text-white rounded-2xl font-bold text-sm shadow-md mt-4">Simpan Lokal</button>
+                        <button onclick="submitManualTransaction()" class="w-full py-4 bg-dana hover:bg-dana-dark text-white rounded-2xl font-bold text-sm shadow-md mt-4">Simpan ke Google Sheet</button>
                     </div>
                 `;
             } else if (type === 'addBudget') {
@@ -2333,33 +2083,39 @@ showToast("Menyimpan Pengaturan Ke Google Sheet...", "success");
             }
         }
 
-        function submitManualTransaction() {
+        async function submitManualTransaction() {
             const amount = parseInt(document.getElementById('tx-amount').value);
             const category = document.getElementById('tx-category').value;
             const wallet = document.getElementById('tx-wallet').value;
             const note = document.getElementById('tx-note').value || category;
-            
+
             if (isNaN(amount) || amount <= 0) return showToast("Nominal tidak valid", "warn");
 
-            const item = {
+            const params = new URLSearchParams({
+                action: 'addTransaction',
                 date: new Date().toISOString().slice(0, 10),
                 type: state.modalType,
                 category,
-                amount,
+                amount: String(amount),
                 note,
-                wallet: wallet
-            };
+                wallet
+            });
 
-            state.data.transactions.push(item);
-            
-            // Rekalkulasi data tempatan secara langsung untuk kelajuan prestasi antarmuka
-            const inc = state.data.transactions.filter(t => t.type === 'income').reduce((a, b) => a + b.amount, 0);
-            const exp = state.data.transactions.filter(t => t.type === 'expense').reduce((a, b) => a + b.amount, 0);
-            state.data.stats = { balance: inc - exp, income: inc, expense: exp };
-
-            closeModal();
-            showToast("Transaksi Berhasil Direkam!", "success");
-            render();
+            showToast("Menyimpan transaksi ke Google Sheet...", "success");
+            try {
+                const response = await fetchWithTimeout(`${CONFIG.API_URL}?${params.toString()}`, { timeout: 15000 });
+                const result = await response.json();
+                if (result && result.status === 'success') {
+                    closeModal();
+                    showToast("Transaksi berhasil disimpan ke Google Sheet!", "success");
+                    fetchDashboardData();
+                } else {
+                    throw new Error(result?.message || "Gagal menyimpan transaksi");
+                }
+            } catch (err) {
+                console.error("Gagal simpan transaksi:", err);
+                showToast("Transaksi gagal disimpan. Cek Apps Script action addTransaction.", "warn");
+            }
         }
 
         // --- PENGURUSAN BUDGET KATEGORI ---
@@ -2388,12 +2144,8 @@ showToast("Menyimpan Pengaturan Ke Google Sheet...", "success");
                     fetchDashboardData();
                 } else throw new Error(result?.message || "Gagal");
             } catch (err) {
-                state.data.budgets[cat] = limit;
-                if (!Array.isArray(state.data.budgetList)) state.data.budgetList = [];
-                state.data.budgetList.push({ wallet, category: cat, monthlyLimit: limit, active: active === 'TRUE' });
-                closeModal();
-                showToast(`Budget tersimpan lokal. Backend belum merespon.`, "warn");
-                render();
+                console.error("Gagal simpan budget:", err);
+                showToast(`Budget gagal disimpan. Cek Apps Script Logs.`, "warn");
             }
         }
 
