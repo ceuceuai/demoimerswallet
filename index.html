@@ -472,7 +472,8 @@
             API_URL: "",
             BOT_NUMBER: "628123456789",
             WRITE_ENABLED: false,
-            FIXED_PIN: "888777"
+            FIXED_PIN: "888777",
+            DEFAULT_DEMO_LOGO: "https://imersnesia.com/wp-content/uploads/2026/05/Final-Logo-imerswallet-WA-only.webp"
         };
 
         // --- PEMETAAN IKON KATEGORI TRANSAKSI (Definisi Awal) ---
@@ -850,6 +851,13 @@
                 }
                 state.isUsingDemo = true;
                 if (!state.data.settings) state.data.settings = {};
+
+                if (
+                    !state.data.settings.APP_LOGO ||
+                    String(state.data.settings.APP_LOGO).trim() === ""
+                ) {
+                    state.data.settings.APP_LOGO = CONFIG.DEFAULT_DEMO_LOGO;
+                }
                 state.data.settings.USER_PIN = CONFIG.FIXED_PIN;
                 state.data.settings.FONNTE_TOKEN = "";
                 state.data.settings.BOT_NUMBER = CONFIG.BOT_NUMBER;
@@ -1623,7 +1631,7 @@ Mode Demo: transaksi tersimpan lokal, bukan ke database live.');
                                 </div>
                                 <div>
                                     <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">URL Logo Kustom</label>
-                                    <input type="text" id="cfg-app-logo" value="${settings.APP_LOGO || ''}" placeholder="https://domain.com/logo.png" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs outline-none focus:border-dana font-mono">
+                                    <input type="text" id="cfg-app-logo" value="${settings.APP_LOGO || ''}" value="https://imersnesia.com/wp-content/uploads/2026/05/Final-Logo-imerswallet-WA-only.webp" placeholder="https://domain.com/logo.png" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs outline-none focus:border-dana font-mono">
                                 </div>
                                 <div>
                                     <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">Footer Sidebar Dashboard</label>
@@ -1787,7 +1795,7 @@ Mode Demo: transaksi tersimpan lokal, bukan ke database live.');
         // --- SIMPAN KONFIGURASI DAN TEMPLAT KEMBALI KE SPREADSHEET ---
         // MENAMBAH VALIDASI CEK KEUTUHAN JALUR URL GAS AGAR TIDAK SALAH COPAST SECARA TRUNCATED
         async function saveAllSettings() {
-            const logoVal = document.getElementById('cfg-app-logo')?.value.trim() || '';
+            const logoVal = document.getElementById('cfg-app-logo')?.value.trim() || CONFIG.DEFAULT_DEMO_LOGO;
             const footerVal = document.getElementById('cfg-footer-text')?.value.trim() || 'Developed by Terry Katar | iMersnesia.com';
             const emailVal = document.getElementById('cfg-user-email')?.value.trim() || '';
             const enableBudgetVal = document.getElementById('cfg-enable-budget')?.value || 'TRUE';
