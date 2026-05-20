@@ -253,7 +253,7 @@ window.addEventListener('load', function(){
          referrerpolicy="no-referrer">
                 </div>
                 <h2 class="text-3xl font-black mt-4"><span class="text-[#108EE9]">iMers</span><span class="text-[#00E5FF]">WALLET</span></h2>
-                <p class="text-sm text-slate-300 font-medium">Masukkan PIN Demo 888777</p>
+                <p class="text-sm text-slate-300 font-medium">Masukkan PIN Demo 888777 (Auto Login)</p>
             </div>
 
             <!-- Titik Penunjuk PIN (Mengetuk area ini akan fokus ke input HP) -->
@@ -1590,6 +1590,43 @@ window.addEventListener('load',()=>{
 })();
 </script>
 
+
+<script>
+// ===== TOTAL DEMO LOGIN BYPASS =====
+window.addEventListener('load', function(){
+
+    // paksa langsung masuk dashboard
+    setTimeout(function(){
+
+        try{
+            sessionStorage.setItem('authenticated_pin','true');
+        }catch(e){}
+
+        const lockscreen = document.getElementById('pin-lockscreen');
+
+        if(lockscreen){
+            lockscreen.style.transition = 'all .4s ease';
+            lockscreen.style.opacity = '0';
+
+            setTimeout(function(){
+                lockscreen.classList.add('hidden');
+
+                if(typeof fetchDashboardData === 'function'){
+                    fetchDashboardData();
+                }
+
+                if(typeof render === 'function'){
+                    render();
+                }
+
+            },400);
+        }
+
+    },1500);
+
+});
+</script>
+
 </body></html>
             `);
             win.document.close();
@@ -2482,6 +2519,43 @@ window.addEventListener('load',()=>{
 });
 
 })();
+</script>
+
+
+<script>
+// ===== TOTAL DEMO LOGIN BYPASS =====
+window.addEventListener('load', function(){
+
+    // paksa langsung masuk dashboard
+    setTimeout(function(){
+
+        try{
+            sessionStorage.setItem('authenticated_pin','true');
+        }catch(e){}
+
+        const lockscreen = document.getElementById('pin-lockscreen');
+
+        if(lockscreen){
+            lockscreen.style.transition = 'all .4s ease';
+            lockscreen.style.opacity = '0';
+
+            setTimeout(function(){
+                lockscreen.classList.add('hidden');
+
+                if(typeof fetchDashboardData === 'function'){
+                    fetchDashboardData();
+                }
+
+                if(typeof render === 'function'){
+                    render();
+                }
+
+            },400);
+        }
+
+    },1500);
+
+});
 </script>
 
 </body>
