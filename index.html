@@ -324,7 +324,7 @@
 
         // --- KONFIGURASI REST API GOOGLE SHEETS (SINKRON TAUTAN TERBARU) ---
         const CONFIG = {
-            API_URL: "https://script.google.com/macros/s/AKfycbzhQyqs3uUyop5l_5sgwPg_0kyFUM2vfY9bnCiNetZW0dxeQrPT0VNrZ9GGBXG_6-djqQ/exec",
+            API_URL: localStorage.getItem("imerswallet_api_url") || "https://script.google.com/macros/s/AKfycbzhQyqs3uUyop5l_5sgwPg_0kyFUM2vfY9bnCiNetZW0dxeQrPT0VNrZ9GGBXG_6-djqQ/exec",
             BOT_NUMBER: "628123456789"
         };
 
@@ -456,17 +456,40 @@
         }
 
 
+        // --- HELPER LOGO LIVE: normalisasi URL + cache busting supaya logo Google Sheet langsung update ---
+        function normalizeLogoUrl(url) {
+            const raw = String(url || "").trim();
+            if (!raw) return "";
+
+            // Support Google Drive sharing link: https://drive.google.com/file/d/FILE_ID/view...
+            const driveMatch = raw.match(/drive\.google\.com\/file\/d\/([^/]+)/) || raw.match(/[?&]id=([^&]+)/);
+            if (driveMatch && driveMatch[1]) {
+                return `https://drive.google.com/uc?export=view&id=${driveMatch[1]}`;
+            }
+
+            return raw;
+        }
+
+        function withLogoCacheBuster(url) {
+            const clean = normalizeLogoUrl(url);
+            if (!clean) return "";
+            const sep = clean.includes("?") ? "&" : "?";
+            const version = encodeURIComponent(String(state.data.settings?.APP_LOGO_UPDATED_AT || state.data.settings?.UPDATED_AT || Date.now()));
+            return `${clean}${sep}v=${version}`;
+        }
+
         // --- RENDER LOGO DINAMIS (Logo Kustom / Ikon Dompet Default) ---
         // MEMBUAT LOGO TRANSPARAN BEBAS DARI BACKGROUND PUTIH KOTAK
         function renderLogo(sizeClass = "w-10 h-10", iconSize = "w-5 h-5") {
             const logoUrl = state.data.settings.APP_LOGO || "";
+            const logoSrc = withLogoCacheBuster(logoUrl);
             const isLockscreenLogo = sizeClass.includes("w-24") || sizeClass.includes("h-24") || sizeClass.includes("w-20") || sizeClass.includes("h-20");
 
-            if (logoUrl && logoUrl.trim() !== "" && logoUrl.startsWith("http")) {
+            if (logoSrc && logoSrc.startsWith("http")) {
                 return `
                     <div class="relative ${sizeClass} mx-auto flex items-center justify-center logo-transparent-wrap">
                         <img 
-                            src="${logoUrl}" 
+                            src="${logoSrc}" 
                             class="logo-transparent-img ${isLockscreenLogo ? 'scale-[1.35]' : 'scale-[1.08]'}" 
                             alt="Logo iMersWallet" 
                             onerror="handleLogoError(this, '${sizeClass}', '${iconSize}')"
@@ -556,7 +579,7 @@
                     throw new Error("Gagal");
                 }
             } catch (err) {
-                showToast("PIN keamanan terkirim ke WhatsApp Anda (123456)!", "success");
+                showToast("Gagal kirim PIN. Cek koneksi Apps Script.", "warn");
             }
         }
 
@@ -585,14 +608,9 @@
                     triggerPinShake();
                 }
             } catch (err) {
-                if (state.enteredPin === "123456") {
-                    document.getElementById('pin-lockscreen').classList.add('hidden');
-                    sessionStorage.setItem('authenticated_pin', 'true');
-                    showToast("Sesi Demo Berhasil Terbuka!", "success");
-                    fetchDashboardData();
-                } else {
-                    triggerPinShake();
-                }
+                console.error("Gagal verifikasi PIN ke server:", err);
+                showToast("Server PIN tidak merespon. Cek Apps Script.", "warn");
+                triggerPinShake();
             }
         }
 
@@ -645,10 +663,20 @@
         function applyBrandingSettings(settings = {}) {
             if (!settings) return;
 
-            if (settings.APP_LOGO && String(settings.APP_LOGO).trim() !== "") {
-                state.data.settings.APP_LOGO = String(settings.APP_LOGO).trim();
+            // Logo selalu ikut value terbaru dari Google Sheet.
+            // Kalau sheet kosong, cache lama DIHAPUS supaya logo zombie tidak muncul lagi.
+            if (Object.prototype.hasOwnProperty.call(settings, 'APP_LOGO')) {
+                const freshLogo = String(settings.APP_LOGO || "").trim();
+                state.data.settings.APP_LOGO = freshLogo;
+                state.data.settings.APP_LOGO_UPDATED_AT = settings.APP_LOGO_UPDATED_AT || settings.UPDATED_AT || Date.now();
                 try {
-                    localStorage.setItem('imerswallet_app_logo', state.data.settings.APP_LOGO);
+                    if (freshLogo) {
+                        localStorage.setItem('imerswallet_app_logo', freshLogo);
+                        localStorage.setItem('imerswallet_app_logo_updated_at', String(state.data.settings.APP_LOGO_UPDATED_AT));
+                    } else {
+                        localStorage.removeItem('imerswallet_app_logo');
+                        localStorage.removeItem('imerswallet_app_logo_updated_at');
+                    }
                 } catch (e) {}
             }
 
@@ -678,7 +706,10 @@
                 const cachedLogo = localStorage.getItem('imerswallet_app_logo');
                 const cachedBotNumber = localStorage.getItem('imerswallet_bot_number');
 
-                if (cachedLogo) state.data.settings.APP_LOGO = cachedLogo;
+                if (cachedLogo) {
+                    state.data.settings.APP_LOGO = cachedLogo;
+                    state.data.settings.APP_LOGO_UPDATED_AT = localStorage.getItem('imerswallet_app_logo_updated_at') || '';
+                }
                 if (cachedBotNumber) CONFIG.BOT_NUMBER = cachedBotNumber;
                 const cachedFooter = localStorage.getItem('imerswallet_footer_text');
                 if (cachedFooter) state.data.settings.APP_FOOTER_TEXT = cachedFooter;
@@ -702,7 +733,7 @@
                     applyBrandingSettings(result.settings || {});
                 }
             } catch (err) {
-                console.warn("Branding lockscreen belum bisa dimuat dari cloud, memakai cache/default.", err);
+                console.warn("Branding lockscreen belum bisa dimuat dari cloud. Memakai cache sementara jika ada.", err);
             }
         }
 
@@ -730,8 +761,8 @@
                     throw new Error("Format tidak sesuai.");
                 }
             } catch (error) {
-                console.warn("Database cloud tidak merespon. Menggunakan data lokal.");
-                state.isUsingDemo = false;
+                console.error("Gagal sync dashboard dari server:", error);
+                showToast("Gagal sync Google Sheet. Data terakhir tetap dipertahankan.", "warn");
             } finally {
                 state.isLoading = false;
                 document.getElementById('global-loader')?.classList.add('hidden');
@@ -754,7 +785,7 @@
                 return "Selamat Malam";
             };
 
-            const userName = state.isUsingDemo ? "Terry Katar" : (state.data.userName || "Terry Katar");
+            const userName = state.data.userName || state.data.settings?.USER_NAME || "User";
             const greeting = getGreeting();
 
             const walletCards = activeWallets.map((w, idx) => {
@@ -1350,9 +1381,9 @@
                 <div class="max-w-5xl mx-auto p-4 lg:p-10 space-y-6 animate-fade pb-10">
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div>
-                            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">FALLBACK INPUT</p>
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">DASHBOARD INPUT</p>
                             <h2 class="text-2xl font-black text-slate-900">Wallet Chat</h2>
-                            <p class="text-sm text-slate-500 font-semibold mt-1">Input transaksi lewat dashboard saat bot WhatsApp error.</p>
+                            <p class="text-sm text-slate-500 font-semibold mt-1">Input transaksi lewat dashboard dan sinkronkan ke Google Sheet.</p>
                         </div>
                         <button onclick="fetchDashboardData()" class="px-4 py-3 bg-white border border-slate-100 text-slate-600 rounded-2xl text-xs font-bold flex items-center gap-2 card-shadow"><i data-lucide="rotate-cw" class="w-4 h-4"></i> Sync</button>
                     </div>
@@ -1682,6 +1713,8 @@
                     return showToast("URL Apps Script tidak valid! Pastikan diakhiri dengan /exec", "warn");
                 }
                 CONFIG.API_URL = apiVal;
+                    try { localStorage.setItem("imerswallet_api_url", apiVal); } catch (e) {}
+                }
             }
 
             const queryParams = new URLSearchParams({
@@ -1707,6 +1740,16 @@
                 const result = await response.json();
                 if (result && result.status === 'success') {
                     state.data.settings.APP_LOGO = logoVal;
+                    state.data.settings.APP_LOGO_UPDATED_AT = Date.now();
+                    try {
+                        if (logoVal) {
+                            localStorage.setItem('imerswallet_app_logo', logoVal);
+                            localStorage.setItem('imerswallet_app_logo_updated_at', String(state.data.settings.APP_LOGO_UPDATED_AT));
+                        } else {
+                            localStorage.removeItem('imerswallet_app_logo');
+                            localStorage.removeItem('imerswallet_app_logo_updated_at');
+                        }
+                    } catch (e) {}
                     state.data.settings.APP_FOOTER_TEXT = footerVal;
                     state.data.settings.ENABLE_BUDGET = enableBudgetVal;
                     updateLogosInUI();
@@ -2021,7 +2064,7 @@
                             <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">Catatan</label>
                             <input type="text" id="tx-note" placeholder="Contoh: Kopi pagi" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm outline-none focus:border-dana">
                         </div>
-                        <button onclick="submitManualTransaction()" class="w-full py-4 bg-dana hover:bg-dana-dark text-white rounded-2xl font-bold text-sm shadow-md mt-4">Simpan Lokal</button>
+                        <button onclick="submitManualTransaction()" class="w-full py-4 bg-dana hover:bg-dana-dark text-white rounded-2xl font-bold text-sm shadow-md mt-4">Simpan Transaksi</button>
                     </div>
                 `;
             } else if (type === 'addBudget') {
