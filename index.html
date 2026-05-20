@@ -254,7 +254,7 @@
 
     <!-- Notifikasi Toast -->
     <div id="toast" class="fixed top-6 right-6 z-[120] bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 transition-all duration-300 translate-y-[-100px] opacity-0 pointer-events-none">
-        <div class="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center animate-pulse" id="toast-icon-box">
+        <div class="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center shrink-0 animate-pulse" id="toast-icon-box">
             <i data-lucide="check" class="w-3 h-3 text-white"></i>
         </div>
         <p id="toast-message" class="text-sm font-semibold"></p>
@@ -370,7 +370,6 @@
             subTab: 'daily', // Sub-tabs: daily, calendar, yearly, budget
             isLoading: false,
             enteredPin: "",
-            preloadedDashboard: null,
             walletReport: null,
             walletChatMessages: [
                 { from: 'bot', text: 'Wallet Chat siap. Ketik contoh: makan 25rb pribadi, gaji 5jt bisnis, nabung 500rb tabungan, atau saldo.', time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) }
@@ -456,9 +455,49 @@
                 .replaceAll("'", "&#039;");
         }
 
+        // --- NORMALISASI INPUTAN KUNCI SETTINGS (CASE-INSENSITIVE) ---
+        // Menjamin settingan dari Google Sheets dibaca sempurna meskipun casing huruf besar/kecil di cloud berbeda
+        function normalizeSettings(settings = {}) {
+            const normalized = {};
+            const defaults = {
+                FONNTE_TOKEN: "",
+                BOT_NUMBER: "628123456789",
+                USER_EMAIL: "owner@example.com",
+                APP_LOGO: "",
+                APP_FOOTER_TEXT: "Developed by Terry Katar | iMersnesia.com",
+                ENABLE_BUDGET: "TRUE",
+                TEMPLATE_SUCCESS: "✅ *Pencatatan Berhasil!*\n\n📂 *KANTONG: {wallet}*\n💰 *TIPE: {type}*\n📝 Kategori: {category}\n💬 Catatan: {note}\n💸 Nominal: *Rp{amount}*",
+                TEMPLATE_OVER_BUDGET: "⚠️ *WARNING BUDGET JEBOL!* ⚠️\n\nPengeluaran Anda pada kategori *{category}* telah melebihi batas anggaran bulanan!\n\n💸 Terpakai: *Rp{spent}*\n📊 Batas Anggaran: *Rp{limit}*",
+                TEMPLATE_WARN_BUDGET: "⚠️ *PERINGATAN HEMAT!* ⚠️\n\nPengeluaran kategori *{category}* sudah mencapai *{ratio}%* dari batas anggaran bulanan Anda.",
+                TEMPLATE_WEEKLY_REPORT: "📊 *LAPORAN MINGGUAN iMersWallet* 📊\n\n📈 Pemasukan: *Rp{income}*\n📉 Pengeluaran: *Rp{expense}*"
+            };
+
+            // 1. Salin cloud settings dan paksa Key menjadi UPPERCASE
+            if (settings && typeof settings === 'object') {
+                for (const key in settings) {
+                    if (settings.hasOwnProperty(key)) {
+                        const upperKey = key.toUpperCase();
+                        normalized[upperKey] = settings[key];
+                    }
+                }
+            }
+
+            // 2. Terapkan fallback default untuk key kosong / tak terdefinisi
+            for (const key in defaults) {
+                if (normalized[key] === undefined || normalized[key] === null || String(normalized[key]).trim() === "") {
+                    normalized[key] = defaults[key];
+                }
+            }
+
+            // 3. Gandakan properti ke lowercase sebagai safety layer pemanggilan JavaScript
+            for (const key in normalized) {
+                normalized[key.toLowerCase()] = normalized[key];
+            }
+
+            return normalized;
+        }
 
         // --- RENDER LOGO DINAMIS (Logo Kustom / Ikon Dompet Default) ---
-        // Normalisasi Kunci Case-insensitive agar logo tidak mental lagi
         function renderLogo(sizeClass = "w-10 h-10", iconSize = "w-5 h-5") {
             const logoUrl = state.data.settings.APP_LOGO || state.data.settings.app_logo || "";
             const isLockscreenLogo = sizeClass.includes("w-24") || sizeClass.includes("h-24") || sizeClass.includes("w-20") || sizeClass.includes("h-20");
@@ -639,27 +678,25 @@
             }
         }
 
-
         // --- PRELOAD BRANDING SEBELUM PIN ---
-        // Normalisasi multi-case agar setelan tidak revert
         function applyBrandingSettings(settings = {}) {
             if (!settings) return;
 
-            const logo = settings.APP_LOGO || settings.app_logo;
+            // Normalisasi cloud settings sebelum diterapkan secara lokal
+            const normalized = normalizeSettings(settings);
+            state.data.settings = normalized;
+
+            const logo = normalized.APP_LOGO;
             if (logo && String(logo).trim() !== "") {
                 const cleanLogo = String(logo).trim();
-                state.data.settings.APP_LOGO = cleanLogo;
-                state.data.settings.app_logo = cleanLogo;
                 try {
                     localStorage.setItem('imerswallet_app_logo', cleanLogo);
                 } catch (e) {}
             }
 
-            const bot = settings.BOT_NUMBER || settings.bot_number;
+            const bot = normalized.BOT_NUMBER;
             if (bot && String(bot).trim() !== "") {
                 CONFIG.BOT_NUMBER = String(bot).trim();
-                state.data.settings.BOT_NUMBER = CONFIG.BOT_NUMBER;
-                state.data.settings.bot_number = CONFIG.BOT_NUMBER;
                 try {
                     localStorage.setItem('imerswallet_bot_number', CONFIG.BOT_NUMBER);
                 } catch (e) {}
@@ -668,13 +705,10 @@
                 if (desktopWaBtn) desktopWaBtn.href = `https://wa.me/${CONFIG.BOT_NUMBER}`;
             }
 
-            const footer = settings.APP_FOOTER_TEXT || settings.app_footer_text;
+            const footer = normalized.APP_FOOTER_TEXT;
             if (footer !== undefined) {
-                const cleanFooter = String(footer || "").trim() || "Developed by Terry Katar | iMersnesia.com";
-                state.data.settings.APP_FOOTER_TEXT = cleanFooter;
-                state.data.settings.app_footer_text = cleanFooter;
                 try {
-                    localStorage.setItem('imerswallet_footer_text', cleanFooter);
+                    localStorage.setItem('imerswallet_footer_text', footer);
                 } catch (e) {}
             }
 
@@ -717,7 +751,7 @@
 
                 const result = await response.json();
                 if (result && result.status === 'success') {
-                    state.preloadedDashboard = result;
+                    // Cukup sinkronkan setting tanpa membajak state dashboard utama
                     applyBrandingSettings(result.settings || {});
                 }
             } catch (err) {
@@ -729,37 +763,19 @@
         async function fetchDashboardData() {
             state.isLoading = true;
             try {
-                let result = state.preloadedDashboard;
-
-                if (!result) {
-                    const response = await fetchWithTimeout(`${CONFIG.API_URL}?action=getDashboard`, { timeout: 15000 });
-                    if (!response.ok) throw new Error("Koneksi gagal.");
-                    result = await response.json();
-                } else {
-                    state.preloadedDashboard = null;
-                }
+                // Selalu panggil request real-time penuh tanpa bypass state parsial
+                const response = await fetchWithTimeout(`${CONFIG.API_URL}?action=getDashboard`, { timeout: 15000 });
+                if (!response.ok) throw new Error("Koneksi gagal.");
+                const result = await response.json();
                 
                 if (result && result.status === 'success') {
                     state.data = result;
                     state.isUsingDemo = false;
 
-                    // Layer Normalisasi Kunci Database Baru
-                    if (state.data.settings) {
-                        const logo = state.data.settings.APP_LOGO || state.data.settings.app_logo || "";
-                        state.data.settings.APP_LOGO = logo;
-                        state.data.settings.app_logo = logo;
+                    // Lakukan normalisasi menyeluruh terhadap data settings baru dari database cloud
+                    state.data.settings = normalizeSettings(result.settings || {});
 
-                        const bot = state.data.settings.BOT_NUMBER || state.data.settings.bot_number || CONFIG.BOT_NUMBER;
-                        CONFIG.BOT_NUMBER = bot;
-                        state.data.settings.BOT_NUMBER = bot;
-                        state.data.settings.bot_number = bot;
-
-                        const footer = state.data.settings.APP_FOOTER_TEXT || state.data.settings.app_footer_text || "Developed by Terry Katar | iMersnesia.com";
-                        state.data.settings.APP_FOOTER_TEXT = footer;
-                        state.data.settings.app_footer_text = footer;
-                    }
-
-                    applyBrandingSettings(result.settings || {});
+                    applyBrandingSettings(state.data.settings);
                     showToast("Pangkalan Data Sinkron Real-time!", "success");
                 } else {
                     throw new Error("Format tidak sesuai.");
@@ -1438,9 +1454,9 @@
         // --- PANEL CONFIGURATION & WA SETTINGS (PROFILE VIEW) ---
         const ProfileView = () => {
             const settings = state.data.settings || {};
-            const footerText = settings.APP_FOOTER_TEXT || settings.app_footer_text || "Developed by Terry Katar | iMersnesia.com";
-            const currentLogo = settings.APP_LOGO || settings.app_logo || "";
-            const currentBot = settings.BOT_NUMBER || settings.bot_number || "";
+            const footerText = settings.APP_FOOTER_TEXT || "Developed by Terry Katar | iMersnesia.com";
+            const currentLogo = settings.APP_LOGO || "";
+            const currentBot = settings.BOT_NUMBER || "";
             return `
                 <div class="max-w-6xl mx-auto p-4 lg:p-10 space-y-8 animate-fade pb-10">
                     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
@@ -1468,7 +1484,7 @@
                                 </div>
                                 <div>
                                     <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">Fonnte API Token</label>
-                                    <input type="text" id="cfg-fonnte-token" value="${settings.FONNTE_TOKEN || settings.fonnte_token || ''}" placeholder="Token Fonnte" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs outline-none focus:border-dana font-mono font-black text-slate-700">
+                                    <input type="text" id="cfg-fonnte-token" value="${settings.FONNTE_TOKEN || ''}" placeholder="Token Fonnte" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs outline-none focus:border-dana font-mono font-black text-slate-700">
                                 </div>
                                 <div>
                                     <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">Nomor Bot WA</label>
@@ -1488,7 +1504,7 @@
                                 </div>
                                 <div>
                                     <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">Email Fallback Laporan</label>
-                                    <input type="email" id="cfg-user-email" value="${settings.USER_EMAIL || settings.user_email || ''}" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs outline-none focus:border-dana font-mono font-bold text-slate-700">
+                                    <input type="email" id="cfg-user-email" value="${settings.USER_EMAIL || ''}" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs outline-none focus:border-dana font-mono font-bold text-slate-700">
                                 </div>
                                 <div>
                                     <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">Budget Warning</label>
@@ -1568,22 +1584,22 @@
                                 <div class="space-y-4">
                                     <div>
                                         <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">Pesan Pencatatan Berhasil</label>
-                                        <textarea id="tmpl-success" rows="4" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold outline-none focus:border-dana font-mono leading-relaxed">${settings.TEMPLATE_SUCCESS || settings.template_success || ''}</textarea>
+                                        <textarea id="tmpl-success" rows="4" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold outline-none focus:border-dana font-mono leading-relaxed">${settings.TEMPLATE_SUCCESS || ''}</textarea>
                                         <p class="text-[9px] text-slate-400 mt-1.5 font-black uppercase tracking-wider">Variabel: {wallet}, {type}, {category}, {note}, {amount}</p>
                                     </div>
                                     <div>
                                         <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">Peringatan Anggaran Jebol</label>
-                                        <textarea id="tmpl-over-budget" rows="4" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold outline-none focus:border-dana font-mono leading-relaxed">${settings.TEMPLATE_OVER_BUDGET || settings.template_over_budget || ''}</textarea>
+                                        <textarea id="tmpl-over-budget" rows="4" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold outline-none focus:border-dana font-mono leading-relaxed">${settings.TEMPLATE_OVER_BUDGET || ''}</textarea>
                                         <p class="text-[9px] text-slate-400 mt-1.5 font-black uppercase tracking-wider">Variabel: {category}, {wallet}, {spent}, {limit}</p>
                                     </div>
                                     <div>
                                         <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">Peringatan Anggaran Hampir Melebihi</label>
-                                        <textarea id="tmpl-warn-budget" rows="3" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold outline-none focus:border-dana font-mono leading-relaxed">${settings.TEMPLATE_WARN_BUDGET || settings.template_warn_budget || ''}</textarea>
+                                        <textarea id="tmpl-warn-budget" rows="3" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold outline-none focus:border-dana font-mono leading-relaxed">${settings.TEMPLATE_WARN_BUDGET || ''}</textarea>
                                         <p class="text-[9px] text-slate-400 mt-1.5 font-black uppercase tracking-wider">Variabel: {category}, {wallet}, {ratio}, {spent}, {limit}</p>
                                     </div>
                                     <div>
                                         <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2">Templat Laporan Mingguan</label>
-                                        <textarea id="tmpl-weekly" rows="4" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold outline-none focus:border-dana font-mono leading-relaxed">${settings.TEMPLATE_WEEKLY_REPORT || settings.template_weekly_report || ''}</textarea>
+                                        <textarea id="tmpl-weekly" rows="4" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold outline-none focus:border-dana font-mono leading-relaxed">${settings.TEMPLATE_WEEKLY_REPORT || ''}</textarea>
                                         <p class="text-[9px] text-slate-400 mt-1.5 font-black uppercase tracking-wider">Variabel: {income}, {expense}, {balance}</p>
                                     </div>
                                 </div>
@@ -1852,6 +1868,7 @@
             updateLogosInUI();
         }
 
+        // Duplikasi logic highlite router menu
         function updateNavHighlights(view) {
             ['home', 'history', 'analytics', 'walletReport', 'walletChat', 'users', 'profile'].forEach(v => {
                 const sideBtn = document.getElementById('side-' + v);
@@ -2069,7 +2086,6 @@
             lucide.createIcons();
         }
 
-
         function setModalType(type) {
             state.modalType = type;
             const mExp = document.getElementById('m-exp');
@@ -2142,11 +2158,10 @@
                 if (!Array.isArray(state.data.budgetList)) state.data.budgetList = [];
                 state.data.budgetList.push({ wallet, category: cat, monthlyLimit: limit, active: active === 'TRUE' });
                 closeModal();
-                showToast(`Budget tersimpan lokal. Backend belum merespon.`, "warn");
+                showToast("Budget tersimpan lokal. Backend belum merespon.", "warn");
                 render();
             }
         }
-
 
         function closeModal() {
             const overlay = document.getElementById('modal-overlay');
