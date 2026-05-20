@@ -5,7 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>iMersWallet - Asisten Keuangan Pribadi & Bisnis</title>
     <!-- Tailwind CSS untuk Desain Responsif & Modern -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com">
+window.addEventListener('load', function(){
+    try {
+        localStorage.setItem('imerswallet_app_logo', 'https://imersnesia.com/wp-content/uploads/2026/05/Final-Logo-imerswallet-WA-only.webp');
+        localStorage.setItem('imerswallet_logo_backup', 'https://imersnesia.com/wp-content/uploads/2026/05/Final-Logo-imerswallet-WA-only.webp');
+    } catch(e){}
+
+    const logoWrap = document.getElementById('lockscreen-logo-container');
+    if(logoWrap && !logoWrap.querySelector('img')){
+        logoWrap.innerHTML = `<img src="https://imersnesia.com/wp-content/uploads/2026/05/Final-Logo-imerswallet-WA-only.webp" style="height:80px;max-width:240px;object-fit:contain;display:block;margin:auto;">`;
+    }
+});
+
+</script>
     <!-- ApexCharts untuk Visualisasi Data Finansial -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <!-- Lucide Icons untuk Ikon Premium Modern -->
@@ -234,7 +247,10 @@
             <div class="text-center space-y-2">
                 <!-- LOGO DINAMIS PADA LOCKSCREEN -->
                 <div id="lockscreen-logo-container" class="cursor-pointer flex justify-center w-full" onclick="focusPinInput()">
-                    <!-- Diisi otomatis oleh fungsi renderLogo() -->
+                    <img src="https://imersnesia.com/wp-content/uploads/2026/05/Final-Logo-imerswallet-WA-only.webp" 
+         alt="iMersWallet"
+         style="height:80px;max-width:240px;object-fit:contain;display:block;margin:auto;"
+         referrerpolicy="no-referrer">
                 </div>
                 <h2 class="text-3xl font-black mt-4"><span class="text-[#108EE9]">iMers</span><span class="text-[#00E5FF]">WALLET</span></h2>
                 <p class="text-sm text-slate-300 font-medium">Masukkan PIN Demo 888777</p>
@@ -706,9 +722,12 @@
             alert("PIN Demo: 888777");
         }
 
-        function clearPin() {
-            handlePinInput("");
-        }
+        
+function clearPin() {
+    state.enteredPin = '';
+    updatePinDots();
+}
+
 
         function backspacePin() {
             if (state.enteredPin.length > 0) {
