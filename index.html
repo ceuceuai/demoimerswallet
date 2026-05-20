@@ -483,13 +483,18 @@ function renderLogo(sizeClass = "w-10 h-10", iconSize = "w-5 h-5") {
         return `
             <div class="relative ${sizeClass} mx-auto flex items-center justify-center logo-transparent-wrap">
                 <img 
-                    src="${logoUrl}" 
-                    class="logo-transparent-img ${isLockscreenLogo ? 'scale-[1.35]' : 'scale-[1.08]'}" 
-                    alt="Logo iMersWallet"
-                    referrerpolicy="no-referrer"
-                    crossorigin="anonymous"
-                    onerror="handleLogoError(this, '${sizeClass}', '${iconSize}')"
-                >
+    src="${logoUrl}?v=${Date.now()}" 
+    class="w-full h-full object-contain ${isLockscreenLogo ? 'scale-[1.35]' : 'scale-[1.08]'}"
+    alt="Logo iMersWallet"
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+    style="display:block;background:transparent;"
+    onload="this.style.opacity='1'"
+    onerror="
+        console.log('LOGO ERROR:', this.src);
+        handleLogoError(this, '${sizeClass}', '${iconSize}')
+    "
+>
             </div>
         `;
     }
